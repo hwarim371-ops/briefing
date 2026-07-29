@@ -96,12 +96,25 @@
     .experience-grid.is-detail::after{opacity:1}
     .map-shell{width:100%;height:var(--user-height,var(--stage-height));min-height:0;position:relative;overflow:hidden;background:#102733;box-shadow:0 30px 70px rgba(0,0,0,.22);transition:box-shadow 900ms ease}
     .map-shell::after{content:"";position:absolute;z-index:6;left:var(--focus-x,50%);top:var(--focus-y,50%);width:76px;height:76px;border-radius:50%;pointer-events:none;opacity:0;transform:translate(-50%,-50%) scale(.25);background:radial-gradient(circle,rgba(243,239,231,.1) 0 24%,rgba(183,97,63,.2) 25% 44%,rgba(214,194,160,.06) 45% 62%,transparent 63%);border:1px solid rgba(214,194,160,.82);box-shadow:0 0 0 1px rgba(183,97,63,.28),0 0 70px rgba(214,194,160,.28)}
-    .map-shell.is-entering-zone::after{animation:zone-dive var(--motion-spatial) var(--ease-soft) both}.map-shell.is-leaving-zone::after{animation:zone-return var(--motion-spatial) var(--ease) both}
+    .map-shell.is-entering-zone::after{animation:zone-dive var(--camera-duration,var(--motion-spatial)) var(--ease-soft) both}.map-shell.is-leaving-zone::after{animation:zone-return var(--camera-duration,var(--motion-spatial)) var(--ease) both}
     @keyframes zone-dive{0%{opacity:0;transform:translate(-50%,-50%) scale(.18)}12%{opacity:1}48%{opacity:.92;transform:translate(-50%,-50%) scale(4.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(24)}}@keyframes zone-return{0%{opacity:0;transform:translate(-50%,-50%) scale(18)}35%{opacity:.5}100%{opacity:0;transform:translate(-50%,-50%) scale(.3)}}
-    .map-world{position:absolute;inset:0;transform-origin:0 0;transform:translate3d(var(--cam-tx,0px),var(--cam-ty,0px),0) scale(var(--cam-scale,1));transition:transform var(--motion-spatial) var(--ease),filter var(--motion-content) ease,opacity var(--motion-content) ease}
+    .map-world{position:absolute;inset:0;transform-origin:0 0;transform:translate3d(var(--cam-tx,0px),var(--cam-ty,0px),0) scale(var(--cam-scale,1));will-change:transform;transition:transform calc(var(--motion-spatial) * 1.24) cubic-bezier(.18,.84,.22,1),filter var(--motion-content) ease,opacity var(--motion-content) ease}
+    .map-world.is-camera-entering{animation:map-camera-enter var(--camera-duration,2100ms) linear both}
+    .map-world.is-camera-returning{animation:map-camera-return var(--camera-duration,2100ms) linear both}
+    @keyframes map-camera-enter{
+      0%{transform:var(--cam-from-transform,translate3d(0,0,0) scale(1));animation-timing-function:cubic-bezier(.34,0,.24,1)}
+      24%{transform:translate3d(var(--cam-p1-tx,0px),var(--cam-p1-ty,0px),0) scale(var(--cam-p1-scale,1.18));animation-timing-function:cubic-bezier(.2,.76,.24,1)}
+      66%{transform:translate3d(var(--cam-p2-tx,0px),var(--cam-p2-ty,0px),0) scale(var(--cam-p2-scale,2.35));animation-timing-function:cubic-bezier(.16,.84,.2,1)}
+      100%{transform:translate3d(var(--cam-tx,0px),var(--cam-ty,0px),0) scale(var(--cam-scale,1))}
+    }
+    @keyframes map-camera-return{
+      0%{transform:var(--cam-from-transform);animation-timing-function:cubic-bezier(.32,0,.22,1)}
+      56%{transform:translate3d(var(--cam-return-tx,0px),var(--cam-return-ty,0px),0) scale(var(--cam-return-scale,1.75));animation-timing-function:cubic-bezier(.2,.78,.24,1)}
+      100%{transform:translate3d(0,0,0) scale(1)}
+    }
     .map-world .media-frame{position:absolute;inset:0;height:100%}
     .map-world::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,19,28,.58),transparent 50%);pointer-events:none}
-    .map-grid{position:absolute;inset:0;z-index:2;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:10% 10%;pointer-events:none}.map-shell.is-entering-zone .map-grid{animation:grid-rush var(--motion-spatial) var(--ease) both}@keyframes grid-rush{0%{opacity:1;background-size:10% 10%}55%{opacity:.72;background-size:17% 17%}100%{opacity:.22;background-size:21% 21%}}
+    .map-grid{position:absolute;inset:0;z-index:2;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:10% 10%;pointer-events:none}.map-shell.is-entering-zone .map-grid{animation:grid-rush var(--camera-duration,var(--motion-spatial)) var(--ease) both}@keyframes grid-rush{0%{opacity:1}58%{opacity:.62}100%{opacity:.22}}
     .route{position:absolute;inset:0;z-index:3;width:100%;height:100%;pointer-events:none}.route polyline{fill:none;stroke:var(--sand);stroke-width:.45;stroke-dasharray:3 2;vector-effect:non-scaling-stroke;stroke-dashoffset:120;animation:route calc(var(--motion-spatial) * 1.7) var(--ease-soft) forwards}
     .route polyline.is-route-switching{animation:route-switch calc(var(--motion-spatial) * 1.15) var(--ease) both}@keyframes route{to{stroke-dashoffset:0}}@keyframes route-switch{0%{opacity:0;stroke-dashoffset:150}35%{opacity:1}100%{opacity:1;stroke-dashoffset:0}}
     .zone-dot{position:absolute;z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.78);background:rgba(8,19,28,.76);transform:translate(-50%,-50%);cursor:pointer;font-weight:900;transition:transform 420ms var(--ease),background var(--motion-micro),box-shadow var(--motion-micro),opacity 480ms ease}
@@ -113,13 +126,13 @@
     .map-controls{position:absolute;z-index:7;left:16px;bottom:16px;display:flex;flex-wrap:wrap;max-width:calc(100% - 32px);gap:6px;transition:opacity 500ms ease,transform 600ms var(--ease)}.map-shell.is-inspecting .map-controls{opacity:.12;transform:translateY(12px);pointer-events:none}.seg{border:1px solid rgba(255,255,255,.3);background:rgba(8,19,28,.72);padding:8px 12px;font-size:10px;cursor:pointer;transition:background var(--motion-micro),border-color var(--motion-micro)}.seg:hover{border-color:var(--sand)}.seg.is-active{background:var(--rust)}
     .experience-grid .zone-sheet{position:absolute;z-index:9;inset:0;width:100%;height:100%;background:#10232d;border:1px solid var(--line);display:block;min-height:0;overflow:hidden;box-shadow:0 34px 90px rgba(0,0,0,.4);opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.065);clip-path:circle(0 at var(--focus-x,50%) var(--focus-y,50%));transition:transform var(--motion-spatial) var(--ease),clip-path var(--motion-spatial) var(--ease),opacity var(--motion-content) ease,visibility 0s linear var(--motion-spatial)}
     .experience-grid .zone-sheet::after{content:"";position:absolute;z-index:2;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(8,19,28,.12),rgba(8,19,28,.1) 42%,rgba(8,19,28,.82) 78%,rgba(8,19,28,.96)),linear-gradient(0deg,rgba(8,19,28,.72),transparent 48%)}
-    .experience-grid.is-detail .zone-sheet{opacity:1;visibility:visible;pointer-events:auto;transform:none;clip-path:circle(150% at var(--focus-x,50%) var(--focus-y,50%));transition-delay:calc(var(--motion-spatial) * .28),calc(var(--motion-spatial) * .28),calc(var(--motion-spatial) * .28),0s}
+    .experience-grid.is-detail .zone-sheet{opacity:1;visibility:visible;pointer-events:auto;transform:none;clip-path:circle(150% at var(--focus-x,50%) var(--focus-y,50%));transition-delay:0s,0s,0s,0s}
     .experience-grid .zone-sheet .media-frame{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-height:100%}.zone-sheet-copy{position:absolute;z-index:3;right:clamp(28px,4vw,72px);bottom:clamp(28px,5vh,64px);width:min(440px,38%);padding:clamp(20px,2vw,30px);background:rgba(8,19,28,.68);backdrop-filter:blur(18px);border-top:2px solid var(--rust);animation:sheet var(--motion-content) var(--ease)}
     @keyframes sheet{from{opacity:0;transform:translate3d(24px,0,0)}to{opacity:1;transform:none}}
-    .map-shell.is-inspecting{box-shadow:0 34px 88px rgba(0,0,0,.34)}.map-shell.is-inspecting .map-world{filter:saturate(1.08) contrast(1.04)}
+    .map-shell.is-inspecting{box-shadow:0 34px 88px rgba(0,0,0,.34)}.map-shell.is-inspecting .map-world{filter:saturate(1.08) contrast(1.04)}.map-shell.is-entering-zone .map-world{filter:none}
     .map-shell.is-tone-switching .map-world{animation:map-tone var(--motion-content) var(--ease) both}
     @keyframes map-tone{0%{opacity:.18;filter:blur(2px) saturate(.65)}100%{opacity:1;filter:none}}
-    .zone-sheet.is-switching .media-frame{animation:detail-media var(--motion-spatial) calc(var(--motion-spatial) * .28) var(--ease) both}.zone-sheet.is-switching .zone-sheet-copy>*{animation:detail-copy var(--motion-content) calc(var(--motion-spatial) * .54) var(--ease) both}.zone-sheet.is-switching .zone-sheet-copy>*:nth-child(2){animation-delay:calc(var(--motion-spatial) * .61)}.zone-sheet.is-switching .zone-sheet-copy>*:nth-child(3){animation-delay:calc(var(--motion-spatial) * .68)}.zone-sheet.is-switching .zone-sheet-copy>*:nth-child(4){animation-delay:calc(var(--motion-spatial) * .75)}
+    .zone-sheet.is-switching .media-frame{animation:detail-media var(--motion-spatial) calc(var(--motion-spatial) * .06) var(--ease) both}.zone-sheet.is-switching .zone-sheet-copy>*{animation:detail-copy var(--motion-content) calc(var(--motion-spatial) * .28) var(--ease) both}.zone-sheet.is-switching .zone-sheet-copy>*:nth-child(2){animation-delay:calc(var(--motion-spatial) * .38)}.zone-sheet.is-switching .zone-sheet-copy>*:nth-child(3){animation-delay:calc(var(--motion-spatial) * .48)}.zone-sheet.is-switching .zone-sheet-copy>*:nth-child(4){animation-delay:calc(var(--motion-spatial) * .58)}
     @keyframes detail-media{0%{opacity:.3;transform:scale(1.055)}100%{opacity:1;transform:none}}@keyframes detail-copy{0%{opacity:0;transform:translate3d(0,22px,0)}100%{opacity:1;transform:none}}
     .zone-sheet-copy>span{color:var(--rust);font:700 11px ui-monospace,monospace}.zone-sheet-copy h3{font-size:30px;margin:12px 0 10px}.zone-sheet-copy p{color:#b8c5c9;line-height:1.7;font-size:14px}
     .zone-meta{border-top:1px solid var(--line);display:grid;gap:10px;padding-top:15px}.zone-meta small{display:block;color:#7e969f;font-size:9px}.zone-meta b{font-size:12px}
@@ -210,7 +223,7 @@
     @media(min-width:1800px) and (min-height:1000px){
       .story-nav{left:34px}.scene-head{grid-template-columns:128px minmax(0,1080px)}.zone-sheet-copy{padding:30px}.persona{padding:34px}.simulator{padding:30px}
     }
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   </style>
 </head>
 <body>
@@ -439,7 +452,7 @@
     function applyImage(frame,key,srcOverride){
       const obj=imageObject(key)||{src:srcOverride||"",focalX:50,focalY:50,zoom:1,fit:"cover",height:520};
       const img=frame.querySelector("img"),src=resolveSrc(srcOverride||obj.src);
-      img.src=src;img.style.objectFit=obj.fit||"cover";frame.style.setProperty("--fx",(obj.focalX??50)+"%");frame.style.setProperty("--fy",(obj.focalY??50)+"%");frame.style.setProperty("--zoom",obj.zoom||1);
+      if(img.getAttribute("src")!==src)img.src=src;img.style.objectFit=obj.fit||"cover";frame.style.setProperty("--fx",(obj.focalX??50)+"%");frame.style.setProperty("--fy",(obj.focalY??50)+"%");frame.style.setProperty("--zoom",obj.zoom||1);
       if(obj.height&&key!=="hero"){frame.style.setProperty("--user-height",obj.height+"px");frame.style.removeProperty("height");const stage=key==="map"?frame.closest(".map-shell"):key==="before"||key==="after"?frame.closest(".compare"):key==="guest"?frame.closest(".guest-visual"):key==="reason"?frame.closest(".reason-visual"):null;if(stage){stage.style.setProperty("--user-height",obj.height+"px");stage.style.removeProperty("height");const layout=key==="map"?stage.closest(".experience-grid"):key==="before"||key==="after"?stage.closest(".land-grid"):key==="guest"?stage.closest(".guest-grid"):key==="reason"?stage.closest(".reason-stage"):null;layout?.style.setProperty("--user-height",obj.height+"px")}}
       img.onerror=()=>{img.style.opacity="0"};img.onload=()=>{img.style.opacity="1"};
     }
@@ -456,7 +469,31 @@
       const z=getSection("experience").zones,idx={guest:[0,1,3,5,7,6,4],service:[0,1,2,3,4,7],emergency:[0,2,4,7,6,1,0]}[kind]||[];
       return idx.map(i=>z[i]).filter(Boolean).map(v=>`${v.x},${v.y}`).join(" ")
     }
-    function focusZoneCamera(zone,scale=4.2){const shell=$("#mapShell"),world=$("#mapWorld"),grid=document.querySelector(".experience-grid");if(!shell||!world)return;if(!zone||scale===1){world.style.setProperty("--cam-tx","0px");world.style.setProperty("--cam-ty","0px");world.style.setProperty("--cam-scale","1");return}const rect=shell.getBoundingClientRect(),zx=(Number(zone.x)||50)/100,zy=(Number(zone.y)||50)/100,x=rect.width*zx,y=rect.height*zy,rawTx=rect.width*.5-x*scale,rawTy=rect.height*.5-y*scale,tx=Math.min(0,Math.max(rect.width-rect.width*scale,rawTx)),ty=Math.min(0,Math.max(rect.height-rect.height*scale,rawTy)),fx=(zx*100)+"%",fy=(zy*100)+"%";shell.style.setProperty("--focus-x",fx);shell.style.setProperty("--focus-y",fy);grid?.style.setProperty("--focus-x",fx);grid?.style.setProperty("--focus-y",fy);world.style.setProperty("--cam-tx",tx.toFixed(1)+"px");world.style.setProperty("--cam-ty",ty.toFixed(1)+"px");world.style.setProperty("--cam-scale",String(scale))}
+    function zoneCameraPose(zone,scale,shell){
+      if(!zone||scale===1)return{tx:0,ty:0,scale:1,fx:"50%",fy:"50%"};
+      const rect=shell.getBoundingClientRect(),zx=(Number(zone.x)||50)/100,zy=(Number(zone.y)||50)/100,x=rect.width*zx,y=rect.height*zy,rawTx=rect.width*.5-x*scale,rawTy=rect.height*.5-y*scale;
+      return{tx:Math.min(0,Math.max(rect.width-rect.width*scale,rawTx)),ty:Math.min(0,Math.max(rect.height-rect.height*scale,rawTy)),scale,fx:(zx*100)+"%",fy:(zy*100)+"%"}
+    }
+    function zoneCameraTransform(p){return`translate3d(${p.tx.toFixed(1)}px,${p.ty.toFixed(1)}px,0) scale(${p.scale})`}
+    function zoneCameraDuration(){return Math.max(2100,(project.settings.motionDuration||1250)*1.65)}
+    function focusZoneCamera(zone,scale=4.2,{animate=true,staged=true}={}){
+      const shell=$("#mapShell"),world=$("#mapWorld"),grid=document.querySelector(".experience-grid");if(!shell||!world)return 0;
+      const startTransform=getComputedStyle(world).transform==="none"?"translate3d(0,0,0) scale(1)":getComputedStyle(world).transform;
+      clearTimeout(world._cameraTimer);world.classList.remove("is-camera-entering","is-camera-returning");
+      const target=zoneCameraPose(zone,scale,shell),duration=zoneCameraDuration();
+      if(zone){shell.style.setProperty("--focus-x",target.fx);shell.style.setProperty("--focus-y",target.fy);grid?.style.setProperty("--focus-x",target.fx);grid?.style.setProperty("--focus-y",target.fy)}
+      shell.style.setProperty("--camera-duration",duration+"ms");world.style.setProperty("--camera-duration",duration+"ms");world.style.setProperty("--cam-from-transform",startTransform);
+      world.style.setProperty("--cam-tx",target.tx.toFixed(1)+"px");world.style.setProperty("--cam-ty",target.ty.toFixed(1)+"px");world.style.setProperty("--cam-scale",String(target.scale));
+      if(!animate)return duration;
+      let motionClass="";
+      if(zone&&staged){
+        const p1=zoneCameraPose(zone,1.18,shell),p2=zoneCameraPose(zone,2.35,shell);world.style.setProperty("--cam-p1-tx",p1.tx.toFixed(1)+"px");world.style.setProperty("--cam-p1-ty",p1.ty.toFixed(1)+"px");world.style.setProperty("--cam-p1-scale",String(p1.scale));world.style.setProperty("--cam-p2-tx",p2.tx.toFixed(1)+"px");world.style.setProperty("--cam-p2-ty",p2.ty.toFixed(1)+"px");world.style.setProperty("--cam-p2-scale",String(p2.scale));motionClass="is-camera-entering"
+      }else if(!zone){
+        const current=getSection("experience").zones[selectedZone],mid=zoneCameraPose(current,1.75,shell);world.style.setProperty("--cam-return-tx",mid.tx.toFixed(1)+"px");world.style.setProperty("--cam-return-ty",mid.ty.toFixed(1)+"px");world.style.setProperty("--cam-return-scale",String(mid.scale));motionClass="is-camera-returning"
+      }
+      if(motionClass){void world.offsetWidth;world.classList.add(motionClass);world._cameraTimer=setTimeout(()=>world.classList.remove(motionClass),duration+80)}
+      return duration
+    }
     function renderExperience(){
       fillEditable("experience");const s=getSection("experience"),z=s.zones[selectedZone]||s.zones[0];
       $("#zoneDots").innerHTML=s.zones.map((v,i)=>`<button type="button" class="zone-dot ${zoneDetailOpen&&i===selectedZone?"is-active":""}" style="left:${v.x}%;top:${v.y}%" data-zone="${i}" aria-label="${safeText(v.id+" "+v.ko)}">${safeText(v.id)}</button>`).join("");
@@ -567,7 +604,7 @@
       const textTarget=e.target.closest("[data-edit],[data-list],[data-direct]");if(textTarget&&!document.body.classList.contains("presentation")){selectText(textTarget);return}
       const goBtn=e.target.closest("[data-go]");if(goBtn)go(goBtn.dataset.go);
       const frame=e.target.closest(".media-frame[data-image-key]");if(frame&&!document.body.classList.contains("presentation"))selectImage(frame);
-      const z=e.target.closest("[data-zone]");if(z){if(zoneDetailOpen)prepareImageTransition($('[data-image-key="zoneDetail"]'));clearInspectorSelection();selectedZone=+z.dataset.zone;zoneDetailOpen=true;const zone=getSection("experience").zones[selectedZone],shell=$("#mapShell");focusZoneCamera(zone,4.2);renderExperience();document.querySelector(".experience-grid")?.classList.add("is-detail");shell.classList.remove("is-leaving-zone");shell.classList.add("is-inspecting");replayEffect(shell,"is-entering-zone",Math.max(1500,(project.settings.motionDuration||1250)*1.3));replayEffect($("#zoneSheet"),"is-switching",Math.max(1900,(project.settings.motionDuration||1250)*1.7));setEditability()}
+      const z=e.target.closest("[data-zone]");if(z){const wasOpen=zoneDetailOpen;if(wasOpen)prepareImageTransition($('[data-image-key="zoneDetail"]'));clearInspectorSelection();selectedZone=+z.dataset.zone;zoneDetailOpen=true;const zone=getSection("experience").zones[selectedZone],shell=$("#mapShell"),grid=document.querySelector(".experience-grid"),cameraMs=zoneCameraDuration();renderExperience();if(!wasOpen)grid?.classList.remove("is-detail");shell.classList.remove("is-leaving-zone");shell.classList.add("is-inspecting");requestAnimationFrame(()=>requestAnimationFrame(()=>{focusZoneCamera(zone,4.35,{animate:true,staged:!wasOpen});replayEffect(shell,"is-entering-zone",cameraMs)}));clearTimeout(grid?._detailTimer);const reveal=()=>{grid?.classList.add("is-detail");replayEffect($("#zoneSheet"),"is-switching",Math.max(1500,(project.settings.motionDuration||1250)*1.35))};if(wasOpen)reveal();else if(grid)grid._detailTimer=setTimeout(reveal,Math.round(cameraMs*.82));setEditability()}
       const tm=e.target.closest("[data-time]");if(tm){prepareImageTransition($('[data-image-key="map"]'));clearInspectorSelection();getSection("experience").time=tm.dataset.time;renderExperience();replayEffect($("#mapShell"),"is-tone-switching",1150);setEditability();setDirty()}
       const rt=e.target.closest("[data-route]");if(rt){clearInspectorSelection();getSection("experience").route=rt.dataset.route;renderExperience();replayEffect($("#routeLine"),"is-route-switching",1900);setEditability();setDirty()}
       const n=e.target.closest("[data-need]");if(n){prepareImageTransition($('[data-image-key="guest"]'));clearInspectorSelection();selectedNeed=+n.dataset.need;renderGuest();replayEffect(document.querySelector(".guest-visual"),"is-switching",1300)}
@@ -590,7 +627,7 @@
       if(el.matches("[data-slider]")){const s=getSection("business"),v=s.scenarios[s.scenario],k=el.dataset.slider;v[k]=+el.value;el.previousElementSibling.querySelector("output").textContent=Number(el.value).toLocaleString()+sliderDefs[k][4];$("#revenueTotal").textContent=money(revenue(v));setDirty()}
     });
     $("#surveyBtn").onclick=()=>{$("#vision").classList.toggle("is-survey");$("#surveyBtn").textContent=$("#vision").classList.contains("is-survey")?"현장 판독 닫기":"계획의 첫 선 보기";replayEffect($("#heroStats"),"is-impacting",1000)};
-    $("#zoneBack").onclick=()=>{clearInspectorSelection();zoneDetailOpen=false;const shell=$("#mapShell"),duration=project.settings.motionDuration||1250;document.querySelector(".experience-grid")?.classList.remove("is-detail");shell.classList.remove("is-inspecting","is-entering-zone");replayEffect(shell,"is-leaving-zone",Math.max(1100,duration*1.25));focusZoneCamera(null,1);setTimeout(()=>renderExperience(),Math.max(900,duration*1.18))};
+    $("#zoneBack").onclick=()=>{clearInspectorSelection();zoneDetailOpen=false;const shell=$("#mapShell"),grid=document.querySelector(".experience-grid");clearTimeout(grid?._detailTimer);grid?.classList.remove("is-detail");shell.classList.remove("is-inspecting","is-entering-zone");const cameraMs=focusZoneCamera(null,1,{animate:true,staged:false});replayEffect(shell,"is-leaving-zone",cameraMs);setTimeout(()=>renderExperience(),cameraMs)};
     $("#fullscreenBtn").onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.();
     $("#inspectorClose").onclick=()=>{$("#inspector").classList.remove("is-open");selectedFrame?.classList.remove("is-selected")};
     $("#textInspectorClose").onclick=()=>$("#textInspector").classList.remove("is-open");
@@ -623,7 +660,7 @@
     $("#listMediaBtn").onclick=listMedia;
     $("#mediaList").onclick=async e=>{const b=e.target.closest("[data-media-download]");if(!b)return;try{const r=await gas("downloadMedia",{data:{mediaId:b.dataset.mediaDownload}}),bin=atob(r.base64),arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);download(b.dataset.name,new Blob([arr],{type:r.mimeType||"application/octet-stream"}))}catch(err){toast(err.message,true)}};
     $("#presentBtn").onclick=()=>setPresentation(!document.body.classList.contains("presentation"));$("#presentExit").onclick=()=>setPresentation(false);
-    window.addEventListener("resize",()=>{clearTimeout(focusZoneCamera.t);focusZoneCamera.t=setTimeout(()=>{if($("#mapShell")?.classList.contains("is-inspecting"))focusZoneCamera(getSection("experience").zones[selectedZone],4.2)},120)},{passive:true});
+    window.addEventListener("resize",()=>{clearTimeout(focusZoneCamera.t);focusZoneCamera.t=setTimeout(()=>{if($("#mapShell")?.classList.contains("is-inspecting"))focusZoneCamera(getSection("experience").zones[selectedZone],4.35,{animate:false})},120)},{passive:true});
     $("#story").addEventListener("wheel",e=>{if(!document.body.classList.contains("presentation")||e.target.closest("input,select,textarea"))return;const amount=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX;if(Math.abs(amount)<32)return;e.preventDefault();if(navigationLock)return;const current=SECTION_IDS.indexOf(activeSection),next=Math.max(0,Math.min(SECTION_IDS.length-1,current+(amount>0?1:-1)));if(next!==current)go(SECTION_IDS[next])},{passive:false});
     window.addEventListener("keydown",e=>{const presenting=document.body.classList.contains("presentation");if(e.key==="Escape"&&presenting){e.preventDefault();setPresentation(false);return}if(!presenting||e.repeat)return;const target=e.target;if(target?.isContentEditable||["INPUT","TEXTAREA","SELECT","BUTTON"].includes(target?.tagName))return;if(/^[1-7]$/.test(e.key)){e.preventDefault();go(SECTION_IDS[+e.key-1]);return}if(e.key==="Home"){e.preventDefault();go(SECTION_IDS[0]);return}if(e.key==="End"){e.preventDefault();go(SECTION_IDS.at(-1));return}let delta=0;if(["ArrowDown","ArrowRight","PageDown"," "].includes(e.key))delta=1;if(["ArrowUp","ArrowLeft","PageUp"].includes(e.key))delta=-1;if(!delta)return;e.preventDefault();const next=Math.max(0,Math.min(SECTION_IDS.length-1,SECTION_IDS.indexOf(activeSection)+delta));go(SECTION_IDS[next])});
     document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("presentation"))setPresentation(false)});
