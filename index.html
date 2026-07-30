@@ -58,7 +58,7 @@
     body[data-motion-preset="slide"] .reveal{clip-path:none;transform:translate3d(34px,0,0);filter:none}
     body[data-motion-preset="fade"] .reveal{clip-path:none;transform:none;filter:blur(3px)}
     body[data-motion-preset] .reveal.is-visible{opacity:1;transform:none;filter:none;clip-path:inset(0)}
-    .media-frame{position:relative;overflow:hidden;background:#17303c;min-height:220px}
+    .media-frame{position:relative;overflow:hidden;background:#17303c;min-height:220px;translate:var(--frame-x,0px) var(--frame-y,0px)}
     .media-frame>img{object-position:var(--fx,50%) var(--fy,50%);transform:scale(var(--zoom,1));transition:transform var(--slow) var(--ease),object-position .25s ease,opacity .8s}
     .media-frame>img.image-ghost{position:absolute;z-index:2;inset:0;pointer-events:none;animation:image-ghost-out var(--motion-content) var(--ease) both}.media-frame>img.image-current-in{animation:image-current-in var(--motion-content) var(--ease) both}
     @keyframes image-ghost-out{0%{opacity:1}100%{opacity:0;transform:scale(.975)}}@keyframes image-current-in{0%{opacity:0;transform:scale(1.045)}100%{opacity:1;transform:scale(var(--zoom,1))}}
@@ -67,9 +67,10 @@
     .media-frame.is-selected{cursor:crosshair}
     .media-frame.is-selected::before{content:"초점 드래그";position:absolute;z-index:3;left:12px;bottom:12px;background:var(--rust);padding:6px 9px;font-size:10px;pointer-events:none}
     .img-fallback{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:linear-gradient(135deg,#163647,#08131c);color:#9db0b9;font-size:11px;letter-spacing:.12em}
-    [data-edit]{outline:1px dashed transparent;outline-offset:5px;transition:outline .2s,background .2s}
-    body:not(.presentation) [data-edit]:hover{outline-color:rgba(183,97,63,.65)}
-    body:not(.presentation) [data-edit][contenteditable=true]:focus{outline:2px solid var(--rust);background:rgba(183,97,63,.12)}
+    [data-edit],[data-list],[data-direct]{outline:1px dashed transparent;outline-offset:5px;transition:outline .2s,background .2s}
+    body:not(.presentation) :is([data-edit],[data-list],[data-direct]):hover{outline-color:rgba(183,97,63,.65)}
+    body:not(.presentation) :is([data-edit],[data-list],[data-direct])[contenteditable=true]:focus,
+    body:not(.presentation) :is([data-edit],[data-list],[data-direct]).is-text-selected{outline:2px solid var(--rust);background:rgba(183,97,63,.12)}
     .hero{padding:0;min-height:max(720px,100vh)}
     .hero-media{position:absolute;inset:0}.hero-media::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(6,15,22,.96) 0%,rgba(6,15,22,.76) 42%,rgba(6,15,22,.14) 76%),linear-gradient(0deg,rgba(6,15,22,.85),transparent 48%)}
     .hero-media .media-frame{height:100%;min-height:max(720px,100vh)}
@@ -99,17 +100,14 @@
     .map-shell.is-entering-zone::after{animation:zone-dive var(--camera-duration,var(--motion-spatial)) var(--ease-soft) both}.map-shell.is-leaving-zone::after{animation:zone-return var(--camera-duration,var(--motion-spatial)) var(--ease) both}
     @keyframes zone-dive{0%{opacity:0;transform:translate(-50%,-50%) scale(.18)}12%{opacity:1}48%{opacity:.92;transform:translate(-50%,-50%) scale(4.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(24)}}@keyframes zone-return{0%{opacity:0;transform:translate(-50%,-50%) scale(18)}35%{opacity:.5}100%{opacity:0;transform:translate(-50%,-50%) scale(.3)}}
     .map-world{position:absolute;inset:0;transform-origin:0 0;transform:translate3d(var(--cam-tx,0px),var(--cam-ty,0px),0) scale(var(--cam-scale,1));will-change:transform;transition:transform calc(var(--motion-spatial) * 1.24) cubic-bezier(.18,.84,.22,1),filter var(--motion-content) ease,opacity var(--motion-content) ease}
-    .map-world.is-camera-entering{animation:map-camera-enter var(--camera-duration,2100ms) linear both}
-    .map-world.is-camera-returning{animation:map-camera-return var(--camera-duration,2100ms) linear both}
+    .map-world.is-camera-entering{animation:map-camera-enter var(--camera-duration,2700ms) cubic-bezier(.2,.72,.16,1) both}
+    .map-world.is-camera-returning{animation:map-camera-return var(--camera-duration,2700ms) cubic-bezier(.28,.62,.18,1) both}
     @keyframes map-camera-enter{
-      0%{transform:var(--cam-from-transform,translate3d(0,0,0) scale(1));animation-timing-function:cubic-bezier(.34,0,.24,1)}
-      24%{transform:translate3d(var(--cam-p1-tx,0px),var(--cam-p1-ty,0px),0) scale(var(--cam-p1-scale,1.18));animation-timing-function:cubic-bezier(.2,.76,.24,1)}
-      66%{transform:translate3d(var(--cam-p2-tx,0px),var(--cam-p2-ty,0px),0) scale(var(--cam-p2-scale,2.35));animation-timing-function:cubic-bezier(.16,.84,.2,1)}
+      0%{transform:var(--cam-from-transform,translate3d(0,0,0) scale(1))}
       100%{transform:translate3d(var(--cam-tx,0px),var(--cam-ty,0px),0) scale(var(--cam-scale,1))}
     }
     @keyframes map-camera-return{
-      0%{transform:var(--cam-from-transform);animation-timing-function:cubic-bezier(.32,0,.22,1)}
-      56%{transform:translate3d(var(--cam-return-tx,0px),var(--cam-return-ty,0px),0) scale(var(--cam-return-scale,1.75));animation-timing-function:cubic-bezier(.2,.78,.24,1)}
+      0%{transform:var(--cam-from-transform)}
       100%{transform:translate3d(0,0,0) scale(1)}
     }
     .map-world .media-frame{position:absolute;inset:0;height:100%}
@@ -117,13 +115,18 @@
     .map-grid{position:absolute;inset:0;z-index:2;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:10% 10%;pointer-events:none}.map-shell.is-entering-zone .map-grid{animation:grid-rush var(--camera-duration,var(--motion-spatial)) var(--ease) both}@keyframes grid-rush{0%{opacity:1}58%{opacity:.62}100%{opacity:.22}}
     .route{position:absolute;inset:0;z-index:3;width:100%;height:100%;pointer-events:none}.route polyline{fill:none;stroke:var(--sand);stroke-width:.45;stroke-dasharray:3 2;vector-effect:non-scaling-stroke;stroke-dashoffset:120;animation:route calc(var(--motion-spatial) * 1.7) var(--ease-soft) forwards}
     .route polyline.is-route-switching{animation:route-switch calc(var(--motion-spatial) * 1.15) var(--ease) both}@keyframes route{to{stroke-dashoffset:0}}@keyframes route-switch{0%{opacity:0;stroke-dashoffset:150}35%{opacity:1}100%{opacity:1;stroke-dashoffset:0}}
-    .zone-dot{position:absolute;z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.78);background:rgba(8,19,28,.76);transform:translate(-50%,-50%);cursor:pointer;font-weight:900;transition:transform 420ms var(--ease),background var(--motion-micro),box-shadow var(--motion-micro),opacity 480ms ease}
+    .zone-dot{position:absolute;z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.78);background:rgba(8,19,28,.76);transform:translate(-50%,-50%);cursor:pointer;font-weight:900;touch-action:none;transition:transform 420ms var(--ease),background var(--motion-micro),box-shadow var(--motion-micro),opacity 480ms ease}
     .zone-dot:hover{background:#914b34;transform:translate(-50%,-50%) scale(1.08)}.zone-dot.is-active{background:var(--rust);transform:translate(-50%,-50%) scale(1.15);box-shadow:0 0 0 9px rgba(183,97,63,.16),0 0 38px rgba(183,97,63,.38)}
+    body:not(.presentation) .zone-dot{cursor:grab}.zone-dot.is-positioning{z-index:8;cursor:grabbing!important;transition:none;transform:translate(-50%,-50%) scale(1.18)!important;background:var(--rust);box-shadow:0 0 0 10px rgba(183,97,63,.18),0 16px 42px rgba(0,0,0,.34)}
+    .zone-dot.is-positioning::before{content:attr(data-position);position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);min-width:max-content;padding:7px 9px;color:#fff;background:rgba(8,19,28,.9);border:1px solid rgba(255,255,255,.24);font:700 9px/1 ui-monospace,monospace;letter-spacing:.08em}
     .zone-dot.is-active::after{content:"";position:absolute;inset:-12px;border:1px solid rgba(214,194,160,.72);border-radius:50%;animation:zone-pulse 1600ms var(--ease) infinite}
     .map-shell.is-entering-zone .zone-dot.is-active{animation:zone-lock var(--motion-content) var(--ease) both}@keyframes zone-lock{0%{opacity:1}35%{opacity:1;transform:translate(-50%,-50%) scale(1.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(.72)}}
     @keyframes zone-pulse{0%{opacity:.8;transform:scale(.72)}75%,100%{opacity:0;transform:scale(1.45)}}
-    .map-shell.is-inspecting .zone-dot:not(.is-active){opacity:0;pointer-events:none}.map-shell.is-inspecting .map-grid{opacity:.22}
+    .map-shell.is-inspecting .zone-dot:not(.is-active){opacity:0;pointer-events:none}.map-shell.is-inspecting .map-grid{opacity:.22}.map-shell.is-leaving-zone .zone-dot{pointer-events:none}
     .map-controls{position:absolute;z-index:7;left:16px;bottom:16px;display:flex;flex-wrap:wrap;max-width:calc(100% - 32px);gap:6px;transition:opacity 500ms ease,transform 600ms var(--ease)}.map-shell.is-inspecting .map-controls{opacity:.12;transform:translateY(12px);pointer-events:none}.seg{border:1px solid rgba(255,255,255,.3);background:rgba(8,19,28,.72);padding:8px 12px;font-size:10px;cursor:pointer;transition:background var(--motion-micro),border-color var(--motion-micro)}.seg:hover{border-color:var(--sand)}.seg.is-active{background:var(--rust)}
+    .point-edit-hint{position:absolute;z-index:7;right:16px;top:16px;padding:9px 12px;color:#dbe4e6;background:rgba(8,19,28,.72);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(10px);font-size:10px;letter-spacing:.04em;pointer-events:none;transition:opacity var(--motion-micro),transform var(--motion-micro)}
+    body:not(.presentation) .point-edit-hint{pointer-events:auto}
+    body.presentation .point-edit-hint,.map-shell.is-inspecting .point-edit-hint,.map-shell.is-entering-zone .point-edit-hint,.map-shell.is-leaving-zone .point-edit-hint{opacity:0;transform:translateY(-8px)}
     .experience-grid .zone-sheet{position:absolute;z-index:9;inset:0;width:100%;height:100%;background:#10232d;border:1px solid var(--line);display:block;min-height:0;overflow:hidden;box-shadow:0 34px 90px rgba(0,0,0,.4);opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.065);clip-path:circle(0 at var(--focus-x,50%) var(--focus-y,50%));transition:transform var(--motion-spatial) var(--ease),clip-path var(--motion-spatial) var(--ease),opacity var(--motion-content) ease,visibility 0s linear var(--motion-spatial)}
     .experience-grid .zone-sheet::after{content:"";position:absolute;z-index:2;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(8,19,28,.12),rgba(8,19,28,.1) 42%,rgba(8,19,28,.82) 78%,rgba(8,19,28,.96)),linear-gradient(0deg,rgba(8,19,28,.72),transparent 48%)}
     .experience-grid.is-detail .zone-sheet{opacity:1;visibility:visible;pointer-events:auto;transform:none;clip-path:circle(150% at var(--focus-x,50%) var(--focus-y,50%));transition-delay:0s,0s,0s,0s}
@@ -155,7 +158,7 @@
     .guest-visual.is-switching .guest-caption{animation:choice-copy var(--motion-content) calc(var(--motion-micro) * .4) var(--ease) both}
     .guest-caption blockquote{font-size:clamp(20px,2.2vw,34px);margin:0}.guest-caption strong{color:var(--sand)}
     .reason-stage{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(330px,.58fr);gap:clamp(18px,1.5vw,28px)}
-    .reason-visual{height:var(--user-height,var(--stage-height));min-height:0;position:relative;overflow:hidden;box-shadow:0 30px 72px rgba(16,33,42,.18)}.reason-visual .media-frame{height:100%;max-height:100%}.reason-overlay{position:absolute;inset:auto 0 0;padding:88px 30px 28px;background:linear-gradient(transparent,rgba(8,19,28,.93));z-index:3}.reason-overlay span{color:var(--sand);font:700 11px ui-monospace}.reason-overlay h3{font-size:clamp(30px,2.5vw,44px);margin:10px 0}.reason-overlay p{max-width:700px;line-height:1.65}
+    .reason-visual{height:var(--user-height,var(--stage-height));min-height:0;position:relative;overflow:hidden;box-shadow:0 30px 72px rgba(16,33,42,.18)}.reason-visual .media-frame{height:100%;max-height:100%}.reason-overlay{position:absolute;inset:auto 0 0;padding:88px 30px 28px;background:linear-gradient(transparent,rgba(8,19,28,.93));z-index:3}.reason-overlay span{color:var(--sand);font:700 11px ui-monospace}.reason-overlay i{font-style:normal}.reason-overlay h3{font-size:clamp(30px,2.5vw,44px);margin:10px 0}.reason-overlay p{max-width:700px;line-height:1.65}
     .reason-visual.is-switching .reason-overlay>*{animation:choice-copy var(--motion-content) var(--ease) both}.reason-visual.is-switching .reason-overlay>*:nth-child(2){animation-delay:calc(var(--motion-micro) * .32)}.reason-visual.is-switching .reason-overlay>*:nth-child(3){animation-delay:calc(var(--motion-micro) * .56)}
     @keyframes choice-media{0%{opacity:.18;transform:scale(1.055)}100%{opacity:1;transform:none}}@keyframes choice-copy{0%{opacity:0;transform:translate3d(0,22px,0)}100%{opacity:1;transform:none}}
     .reason-tabs{display:grid;gap:9px;align-content:stretch}.reason-tabs button{border:1px solid rgba(16,33,42,.18);border-left:3px solid transparent;background:#e7e1d6;color:var(--ink);padding:18px;text-align:left;cursor:pointer;position:relative;overflow:hidden;transition:color var(--motion-micro),background var(--motion-micro),border-color var(--motion-micro),transform var(--motion-micro) var(--ease)}.reason-tabs button::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--rust);transform:scaleY(0);transform-origin:bottom;transition:transform 480ms var(--ease)}.reason-tabs button:hover{transform:translateX(-4px);background:#ddd4c5}.reason-tabs button.is-active{background:var(--navy);color:#fff;border-left-color:var(--rust);transform:translateX(-7px);box-shadow:0 16px 34px rgba(16,33,42,.16)}.reason-tabs button.is-active::before{transform:scaleY(1)}.reason-tabs span{font:800 10px ui-monospace}.reason-tabs b{display:block;font-size:18px;margin-top:7px}
@@ -167,8 +170,8 @@
     .risk-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.risk-tabs button{border:1px solid var(--line);background:none;padding:10px 6px;font-size:10px;cursor:pointer}.risk-tabs button.is-active{background:var(--rust)}
     .risk-sheet{margin-top:14px;padding:clamp(14px,1.3vw,21px);background:#102733;animation:sheet 850ms var(--ease)}.risk-sheet>span{color:var(--rust);font:800 10px ui-monospace}.risk-sheet h3{font-size:clamp(23px,2vw,31px);margin:9px 0}.risk-sheet p{line-height:1.6;color:#aec0c5}.risk-sheet b{display:block;padding-top:12px;border-top:1px solid var(--line);color:var(--sand)}
     .risk-sheet.is-switching{animation:choice-copy 760ms var(--ease) both}
-    .approvals{margin-top:clamp(12px,1.7vh,22px);display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.approvals button{min-height:clamp(76px,10vh,112px);border:1px solid var(--line);background:none;padding:clamp(11px,1.2vw,17px);text-align:left;cursor:pointer;position:relative;transition:background var(--motion-micro),transform var(--motion-micro) var(--ease),border-color var(--motion-micro)}.approvals button:hover{transform:translateY(-3px);background:rgba(255,255,255,.05)}.approvals button.is-approved{background:rgba(95,112,92,.35);border-color:#9eb497}.approvals button.is-approved::after{content:"APPROVED";position:absolute;right:8px;bottom:8px;border:2px solid #9eb497;padding:5px;transform:rotate(-8deg);font:800 10px ui-monospace;animation:stamp-in 520ms var(--ease) both}@keyframes stamp-in{0%{opacity:0;transform:scale(1.7) rotate(-14deg)}100%{opacity:1;transform:scale(1) rotate(-8deg)}}
-    .footer-verdict{margin-top:clamp(12px,1.8vh,24px);border-top:1px solid var(--line);padding-top:clamp(12px,1.6vh,22px);display:flex;justify-content:space-between;gap:30px;align-items:end}.footer-verdict blockquote{font-size:clamp(24px,2.3vw,42px);max-width:980px;margin:0}.stamp{border:2px solid var(--rust);color:var(--rust);padding:12px;transform:rotate(-3deg);font:800 11px ui-monospace;text-align:center}
+    .approvals{margin-top:clamp(12px,1.7vh,22px);display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.approvals button{min-height:clamp(76px,10vh,112px);border:1px solid var(--line);background:none;padding:clamp(11px,1.2vw,17px);text-align:left;cursor:pointer;position:relative;transition:background var(--motion-micro),transform var(--motion-micro) var(--ease),border-color var(--motion-micro)}.approvals button:hover{transform:translateY(-3px);background:rgba(255,255,255,.05)}.approvals button.is-approved{background:rgba(95,112,92,.35);border-color:#9eb497}.approval-label{display:none;position:absolute;right:8px;bottom:8px;border:2px solid #9eb497;padding:5px;transform:rotate(-8deg);font:800 10px ui-monospace}.approvals button.is-approved .approval-label{display:block;animation:stamp-in 520ms var(--ease) both}@keyframes stamp-in{0%{opacity:0;transform:scale(1.7) rotate(-14deg)}100%{opacity:1;transform:scale(1) rotate(-8deg)}}
+    .footer-verdict{margin-top:clamp(12px,1.8vh,24px);border-top:1px solid var(--line);padding-top:clamp(12px,1.6vh,22px);display:flex;justify-content:space-between;gap:30px;align-items:end}.footer-verdict blockquote{font-size:clamp(24px,2.3vw,42px);max-width:980px;margin:0}.stamp{border:2px solid var(--rust);color:var(--rust);padding:12px;transform:rotate(-3deg);font:800 11px ui-monospace;text-align:center;white-space:pre-line}
     /* editor */
     .admin-dock{position:fixed;z-index:300;left:50%;right:auto;bottom:16px;width:min(calc(100vw - 32px),1580px);min-height:58px;transform:translateX(-50%);overflow-x:auto;scrollbar-width:none;background:rgba(247,244,238,.96);color:var(--ink);border:1px solid rgba(16,33,42,.2);box-shadow:0 18px 60px rgba(0,0,0,.34);backdrop-filter:blur(18px);display:flex;align-items:center;gap:7px;padding:8px;border-radius:14px}.admin-dock::-webkit-scrollbar{display:none}
     .admin-dock button,.admin-dock select,.admin-dock input{height:40px;border:1px solid #c7c2ba;background:#fff;color:var(--ink);border-radius:9px;padding:0 12px;font-size:11px}
@@ -176,13 +179,15 @@
     .admin-dock .dock-label{font-size:10px;font-weight:800;padding:0 7px;white-space:nowrap}.admin-dock .divider{height:28px;width:1px;background:#d5d0c8}
     .inspector{position:fixed;z-index:310;right:16px;top:84px;width:310px;max-height:calc(100vh - 170px);overflow:auto;background:#f7f4ee;color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.36);border-radius:14px;padding:18px;transform:translateX(calc(100% + 35px));transition:transform .55s var(--ease)}
     .inspector.is-open{transform:none}.inspector header{display:flex;justify-content:space-between;align-items:center}.inspector h3{font-size:16px;margin:0}.inspector header button{border:0;background:none;font-size:22px;cursor:pointer}.control{margin-top:16px}.control label{display:flex;justify-content:space-between;font-size:11px;font-weight:700}.control input[type=range]{width:100%;accent-color:var(--rust)}.control small{color:#65757a}.control-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.control-row button,.replace-label{border:1px solid #c9c4ba;background:#fff;color:var(--ink);border-radius:8px;padding:10px;text-align:center;font-size:10px;cursor:pointer}.control-row button.is-active{background:var(--rust);color:#fff}.replace-label{display:block;margin-top:14px}.replace-label input{display:none}.text-inspector .align-row{grid-template-columns:repeat(3,1fr)}
+    .move-handle{position:fixed;z-index:318;display:none;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:var(--rust);color:#fff;padding:8px 11px;box-shadow:0 12px 32px rgba(0,0,0,.34);font:800 10px/1 ui-monospace,monospace;letter-spacing:.08em;cursor:grab;touch-action:none}.move-handle.is-open{display:flex}.move-handle.is-dragging{cursor:grabbing;transform:scale(1.05)}
     .settings{position:fixed;z-index:320;inset:50% auto auto 50%;transform:translate(-50%,-46%) scale(.96);width:min(620px,calc(100% - 30px));max-height:86vh;overflow:auto;background:#f7f4ee;color:var(--ink);border-radius:16px;box-shadow:0 30px 100px rgba(0,0,0,.55);padding:24px;opacity:0;pointer-events:none;transition:.4s var(--ease)}.settings.is-open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
     .settings header{display:flex;justify-content:space-between}.settings header button{border:0;background:none;font-size:24px}.settings h2{margin:0}.settings p{font-size:12px;color:#5c6d72;line-height:1.7}.field{display:grid;gap:6px;margin:15px 0}.field label{font-size:11px;font-weight:800}.field input,.field select{height:42px;border:1px solid #c9c4ba;background:#fff;border-radius:8px;padding:0 12px}.field input[type=range]{padding:0;accent-color:var(--rust)}.settings-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}.settings-actions button,.file-action{border:1px solid #c5c0b7;background:#fff;color:var(--ink);border-radius:8px;padding:11px 13px;font-size:11px;cursor:pointer}.settings-actions .primary{background:var(--rust);color:#fff;border-color:var(--rust)}.file-action input{display:none}
     .media-list{display:grid;gap:6px;margin-top:12px}.media-row{border:1px solid #d4cec4;padding:9px;display:grid;grid-template-columns:1fr auto;gap:8px;font-size:10px}.media-row button{border:0;background:var(--navy);color:#fff;border-radius:5px;padding:6px 8px}
     .toast{position:fixed;z-index:600;left:50%;top:84px;transform:translate(-50%,-20px);background:#fff;color:var(--ink);padding:11px 16px;border-radius:999px;box-shadow:0 8px 28px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:.4s}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.error{background:#7a2f27;color:#fff}
     .drop-mask{position:fixed;z-index:590;inset:0;background:rgba(8,19,28,.86);display:none;place-items:center;font-size:20px}.drop-mask.is-on{display:grid}
     body.presentation .admin-dock,body.presentation .inspector,body.presentation .settings{display:none!important}
-    body.presentation [data-edit]{outline:0!important}
+    body.presentation :is([data-edit],[data-list],[data-direct]){outline:0!important}
+    body.presentation .move-handle{display:none!important}
     body.presentation{height:100vh;overflow:hidden;padding-bottom:0}
     body.presentation #story{position:relative;height:100vh;overflow:hidden;background:var(--navy)}
     body.presentation .scene{position:absolute;inset:0;width:100%;height:100vh;min-height:720px;z-index:1;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(3.4vw,0,0) scale(.992);transition:opacity var(--motion-scene) ease,transform var(--motion-scene) var(--ease),visibility 0s linear var(--motion-scene)}
@@ -241,54 +246,55 @@
       <div class="hero-media"><div class="media-frame" data-image-key="hero"><div class="img-fallback">TIDE TERRACE · HERO IMAGE</div><img alt="해안 경사지 캠프 조감도"></div></div>
       <div class="survey-layer" aria-hidden="true"><span class="contour c1"></span><span class="contour c2"></span><span class="contour c3"></span><i class="datum d1"></i><i class="datum d2"></i><i class="datum d3"></i></div>
       <div class="hero-copy">
-        <div class="eyebrow reveal">HWARIM CONSTRUCTION · FIELD RECORD 01</div>
+        <div class="eyebrow reveal" data-edit="eyebrow"></div>
         <h1 class="reveal delay-1"><span data-edit="title1"></span><strong data-edit="title2"></strong></h1>
         <p class="reveal delay-2" data-edit="slogan"></p>
-        <button type="button" class="line-button" id="surveyBtn">계획의 첫 선 보기</button>
+        <button type="button" class="line-button" id="surveyBtn"><span data-edit="surveyButton"></span></button>
         <div class="hero-stats" id="heroStats"></div>
       </div>
     </section>
 
     <section class="scene dark experience" id="experience" data-section="experience">
-      <div class="scene-head reveal"><div class="scene-index">02 · 배치</div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
+      <div class="scene-head reveal"><div class="scene-index">02 · <span data-edit="chapter"></span></div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
       <div class="experience-grid">
         <div class="map-shell reveal delay-1" id="mapShell">
           <div class="map-world" id="mapWorld"><div class="media-frame" data-image-key="map"><div class="img-fallback">MASTERPLAN · A–H</div><img alt="전체 공간 조감도"></div><div class="map-grid"></div><svg class="route" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline id="routeLine"></polyline></svg><div id="zoneDots"></div></div>
           <div class="map-controls" id="routeTabs"></div>
+          <div class="point-edit-hint" data-edit="pointHint"></div>
         </div>
         <article class="zone-sheet" id="zoneSheet">
           <div class="media-frame" data-image-key="zoneDetail"><div class="img-fallback">ZONE REFERENCE</div><img alt="선택 공간 참고 이미지"></div>
           <div class="zone-sheet-copy" id="zoneCopy"></div>
-          <button class="zone-back" type="button" id="zoneBack">← BACK TO MASTERPLAN</button>
+          <button class="zone-back" type="button" id="zoneBack"><span data-edit="backLabel"></span></button>
         </article>
       </div>
     </section>
 
     <section class="scene light" id="land" data-section="land">
-      <div class="scene-head reveal"><div class="scene-index">03 · 근거</div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
+      <div class="scene-head reveal"><div class="scene-index">03 · <span data-edit="chapter"></span></div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
       <div class="land-grid">
         <div class="compare reveal delay-1" id="compare">
           <div class="media-frame" data-image-key="before"><div class="img-fallback">BEFORE · 자연 경사지</div><img alt="개발 전 자연 경사지"></div>
           <div class="media-frame compare-after" data-image-key="after"><div class="img-fallback">AFTER · 세 개의 조망 테라스</div><img alt="개발 후 조망 테라스"></div>
-          <span class="compare-label before">BEFORE · 자연 경사지</span><span class="compare-label after">AFTER · 조망 테라스</span>
+          <span class="compare-label before" data-edit="beforeLabel"></span><span class="compare-label after" data-edit="afterLabel"></span>
           <div class="compare-handle" id="compareHandle" aria-hidden="true"><span>50%</span></div>
           <input class="compare-range" id="compareRange" type="range" min="5" max="95" value="50" aria-label="개발 전후 비교">
         </div>
-        <div class="land-notes reveal delay-2"><div class="note-card"><span>KEEP · 살릴 것</span><h3>땅이 이미 가진 가치</h3><ul id="keepList"></ul></div><div class="note-card solve"><span>SOLVE · 해결할 것</span><h3>설계가 책임질 문제</h3><ul id="solveList"></ul></div></div>
+        <div class="land-notes reveal delay-2"><div class="note-card"><span data-edit="keepKicker"></span><h3 data-edit="keepTitle"></h3><ul id="keepList"></ul></div><div class="note-card solve"><span data-edit="solveKicker"></span><h3 data-edit="solveTitle"></h3><ul id="solveList"></ul></div></div>
       </div>
       <blockquote class="land-quote reveal" data-edit="quote"></blockquote>
     </section>
 
     <section class="scene dark" id="guest" data-section="guest">
-      <div class="scene-head reveal"><div class="scene-index">04 · 사용</div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
+      <div class="scene-head reveal"><div class="scene-index">04 · <span data-edit="chapter"></span></div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
       <div class="guest-grid">
-        <article class="persona reveal delay-1"><span class="eyebrow">PRIMARY GUEST</span><h3 data-edit="personaTitle"></h3><p data-edit="personaDetail"></p><div class="need-tabs" id="needTabs"></div></article>
-        <div class="guest-visual reveal delay-2"><div class="media-frame" data-image-key="guest"><div class="img-fallback">FAMILY EXPERIENCE</div><img alt="대표 가족의 이용 장면"></div><div class="guest-caption"><blockquote><span data-edit="quote"></span> <strong data-edit="quoteStrong"></strong>을 제공합니다.</blockquote></div></div>
+        <article class="persona reveal delay-1"><span class="eyebrow" data-edit="personaKicker"></span><h3 data-edit="personaTitle"></h3><p data-edit="personaDetail"></p><div class="need-tabs" id="needTabs"></div></article>
+        <div class="guest-visual reveal delay-2"><div class="media-frame" data-image-key="guest"><div class="img-fallback">FAMILY EXPERIENCE</div><img alt="대표 가족의 이용 장면"></div><div class="guest-caption"><blockquote><span data-edit="quote"></span> <strong data-edit="quoteStrong"></strong><span data-edit="quoteSuffix"></span></blockquote></div></div>
       </div>
     </section>
 
     <section class="scene light" id="reason" data-section="reason">
-      <div class="scene-head reveal"><div class="scene-index">05 · 차별</div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
+      <div class="scene-head reveal"><div class="scene-index">05 · <span data-edit="chapter"></span></div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
       <div class="reason-stage">
         <div class="reason-visual reveal delay-1"><div class="media-frame" data-image-key="reason"><div class="img-fallback">CORE PROMISE</div><img alt="선택 이유 참고 이미지"></div><div class="reason-overlay" id="reasonCopy"></div></div>
         <div class="reason-tabs reveal delay-2" id="reasonTabs"></div>
@@ -296,21 +302,21 @@
     </section>
 
     <section class="scene light" id="business" data-section="business">
-      <div class="scene-head reveal"><div class="scene-index">06 · 운영</div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
+      <div class="scene-head reveal"><div class="scene-index">06 · <span data-edit="chapter"></span></div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
       <div class="business-grid">
-        <article class="operating reveal delay-1"><span class="eyebrow" style="color:var(--rust)">OPERATING MODEL</span><h3 data-edit="operatingTitle"></h3><div class="staff" id="staffList"></div></article>
-        <article class="simulator reveal delay-2"><div class="sim-head"><div><span class="eyebrow">LIVE REVENUE SIMULATOR</span><h3>연간 총매출 시뮬레이션</h3></div><div class="scenario" id="scenarioTabs"></div></div><div class="revenue-total"><span>예상 연간 총매출<br><small>가상 예시 · 운영비 미반영</small></span><b id="revenueTotal">0원</b></div><div class="sliders" id="sliders"></div></article>
+        <article class="operating reveal delay-1"><span class="eyebrow" style="color:var(--rust)" data-edit="operatingKicker"></span><h3 data-edit="operatingTitle"></h3><div class="staff" id="staffList"></div></article>
+        <article class="simulator reveal delay-2"><div class="sim-head"><div><span class="eyebrow" data-edit="simKicker"></span><h3 data-edit="simTitle"></h3></div><div class="scenario" id="scenarioTabs"></div></div><div class="revenue-total"><span><i data-edit="revenueLabel" style="font-style:normal"></i><br><small data-edit="revenueNote"></small></span><b id="revenueTotal">0원</b></div><div class="sliders" id="sliders"></div></article>
       </div>
     </section>
 
     <section class="scene dark" id="decision" data-section="decision">
-      <div class="scene-head reveal"><div class="scene-index">07 · 결정</div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
+      <div class="scene-head reveal"><div class="scene-index">07 · <span data-edit="chapter"></span></div><div><p data-edit="label"></p><h2 data-edit="title"></h2></div></div>
       <div class="decision-grid">
-        <article class="gates reveal delay-1"><span class="eyebrow">6 DECISION GATES</span><ol id="gateList"></ol></article>
-        <article class="risks reveal delay-2"><span class="eyebrow">RISK MATRIX</span><div class="risk-tabs" id="riskTabs"></div><div class="risk-sheet" id="riskSheet"></div></article>
+        <article class="gates reveal delay-1"><span class="eyebrow" data-edit="gatesKicker"></span><ol id="gateList"></ol></article>
+        <article class="risks reveal delay-2"><span class="eyebrow" data-edit="risksKicker"></span><div class="risk-tabs" id="riskTabs"></div><div class="risk-sheet" id="riskSheet"></div></article>
       </div>
       <div class="approvals reveal" id="approvalList"></div>
-      <footer class="footer-verdict reveal"><blockquote><span data-edit="footer"></span> <strong data-edit="footerStrong"></strong></blockquote><div class="stamp">HWARIM<br>CONDITIONAL GO<br>NEXT · GATE 01</div></footer>
+      <footer class="footer-verdict reveal"><blockquote><span data-edit="footer"></span> <strong data-edit="footerStrong"></strong></blockquote><div class="stamp" data-edit="stamp"></div></footer>
     </section>
   </main>
 
@@ -327,25 +333,30 @@
     <label class="replace-label">이미지 교체<input type="file" id="imageReplace" accept="image/*"></label>
     <div class="control"><label>확대 <output id="zoomOut">100%</output></label><input type="range" id="zoomRange" min="100" max="220" value="100"></div>
     <div class="control" id="heightControl"><label>편집 프레임 높이 <output id="heightOut">520px</output></label><input type="range" id="heightRange" min="220" max="900" value="520"><small>발표모드는 PC 화면 비율에 자동 맞춤됩니다.</small></div>
+    <div class="control"><label>프레임 폭 <output id="frameWidthOut">100%</output></label><input type="range" id="frameWidthRange" min="35" max="140" value="100"></div>
+    <div class="control"><label>좌우 위치 <output id="frameXOut">0px</output></label><input type="range" id="frameXRange" min="-360" max="360" value="0"></div>
+    <div class="control"><label>상하 위치 <output id="frameYOut">0px</output></label><input type="range" id="frameYRange" min="-260" max="260" value="0"></div>
     <div class="control"><label>가로 초점 <output id="focusXOut">50%</output></label><input type="range" id="focusXRange" min="0" max="100" value="50"></div>
     <div class="control"><label>세로 초점 <output id="focusYOut">50%</output></label><input type="range" id="focusYRange" min="0" max="100" value="50"></div>
     <div class="control-row"><button type="button" data-fit="cover" class="is-active">프레임 채우기</button><button type="button" data-fit="contain">전체 보기</button></div>
-    <p style="font-size:10px;line-height:1.6;color:#65757a">이미지 위를 직접 드래그하면 초점이 즉시 이동합니다. 이 움직임은 편집 중에만 작동합니다.</p>
+    <p style="font-size:10px;line-height:1.6;color:#65757a">선택 요소 옆의 ‘이동’ 손잡이로 위치를 옮깁니다. 이미지 자체를 드래그하면 초점이 이동합니다.</p>
   </aside>
+
+  <button class="move-handle" id="moveHandle" type="button" aria-label="선택 요소 위치 이동">⠿ 이동</button>
 
   <aside class="inspector text-inspector" id="textInspector">
     <header><div><small>TEXT DIRECT EDIT</small><h3>선택한 텍스트</h3></div><button type="button" id="textInspectorClose">×</button></header>
     <div class="control"><label>글자 크기 <output id="fontSizeOut">24px</output></label><input type="range" id="fontSizeRange" min="10" max="96" value="24"></div>
     <div class="control"><label>가로 폭 <output id="textWidthOut">100%</output></label><input type="range" id="textWidthRange" min="30" max="100" value="100"></div>
-    <div class="control"><label>좌우 위치 <output id="textXOut">0px</output></label><input type="range" id="textXRange" min="-200" max="200" value="0"></div>
-    <div class="control"><label>상하 위치 <output id="textYOut">0px</output></label><input type="range" id="textYRange" min="-160" max="160" value="0"></div>
+    <div class="control"><label>좌우 위치 <output id="textXOut">0px</output></label><input type="range" id="textXRange" min="-500" max="500" value="0"></div>
+    <div class="control"><label>상하 위치 <output id="textYOut">0px</output></label><input type="range" id="textYRange" min="-320" max="320" value="0"></div>
     <div class="control-row align-row"><button type="button" data-align="left">왼쪽</button><button type="button" data-align="center">가운데</button><button type="button" data-align="right">오른쪽</button></div>
     <div class="control-row"><button type="button" id="textStyleReset">기본값 복원</button></div>
   </aside>
 
   <section class="settings" id="settings">
     <header><div><small>GITHUB PAGES × GOOGLE DRIVE</small><h2>연결 · 파일 관리</h2></div><button type="button" id="settingsClose">×</button></header>
-    <p>Apps Script의 <b>웹 앱 URL</b>과 관리자 키를 입력하세요. 관리자 키는 공개 HTML에 저장하지 않고 이 브라우저에만 보관합니다.</p>
+    <p>기본 Apps Script 연결 주소가 설정되어 있습니다. 다른 배포 주소를 사용할 때만 URL을 변경하세요. 관리자 키는 공개 HTML에 저장하지 않고 이 브라우저에만 보관합니다.</p>
     <div class="field"><label for="gasUrl">Apps Script 웹 앱 URL</label><input id="gasUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"></div>
     <div class="field"><label for="adminKeyField">관리자 키</label><input id="adminKeyField" type="password" inputmode="numeric" autocomplete="off" placeholder="관리자 키를 입력하세요"></div>
     <div class="field"><label for="projectName">프로젝트 이름</label><input id="projectName" type="text"></div>
@@ -384,8 +395,8 @@
       theme:{navy:"#08131c",ocean:"#174458",tide:"#3e7d91",ivory:"#f3efe7",sand:"#d6c2a0",moss:"#5f705c",rust:"#b7613f"},
       settings:{motionPreset:"mask",motionDuration:1250,presentation:false,textStyles:{}},
       sections:{
-        vision:{label:"THE VISION",title:"이 땅에 무엇을 만들 것인가?",title1:"경사를 없애지 않고,",title2:"모든 가족에게 바다를 나눕니다.",slogan:"아이를 놓치지 않고, 바다를 놓치지 않는 캠핑",stats:[["14","GLAMPING UNITS"],["56","GUESTS"],["CAR-FREE","CORE"],["OCEAN","VIEW"]],images:{hero:image(builtin("golden"),760)}},
-        experience:{label:"THE EXPERIENCE",title:"공간은 어떻게 구성되고 고객은 어떻게 이용하는가?",route:"guest",time:"day",images:{mapDay:image(builtin("day"),650),mapSunset:image(builtin("golden"),650),mapNight:image(builtin("night"),650),zoneDetail:image(builtin("family"),280)},zones:[
+        vision:{chapter:"가치",label:"THE VISION",title:"이 땅에 무엇을 만들 것인가?",eyebrow:"HWARIM CONSTRUCTION · FIELD RECORD 01",title1:"경사를 없애지 않고,",title2:"모든 가족에게 바다를 나눕니다.",slogan:"아이를 놓치지 않고, 바다를 놓치지 않는 캠핑",surveyButton:"계획의 첫 선 보기",surveyCloseButton:"현장 판독 닫기",stats:[["14","GLAMPING UNITS"],["56","GUESTS"],["CAR-FREE","CORE"],["OCEAN","VIEW"]],images:{hero:image(builtin("golden"),760)}},
+        experience:{chapter:"배치",label:"THE EXPERIENCE",title:"공간은 어떻게 구성되고 고객은 어떻게 이용하는가?",pointHint:"포인트를 드래그해 위치 변경 · 클릭해 상세 보기",backLabel:"← BACK TO MASTERPLAN",zonePrefix:"ZONE",userLabel:"대표 이용자",valueLabel:"고객 가치",roleLabel:"운영 · 매출 역할",timeLabels:{day:"낮",sunset:"일몰",night:"야간"},routeLabels:{guest:"고객 동선",service:"관리 동선",emergency:"비상 동선"},route:"guest",time:"day",images:{mapDay:image(builtin("day"),650),mapSunset:image(builtin("golden"),650),mapNight:image(builtin("night"),650),zoneDetail:image(builtin("family"),280)},zones:[
           {id:"A",en:"ARRIVAL RIDGE",ko:"어라이벌 리지",x:15,y:18,purpose:"차량을 멈추고 체류를 시작하는 상단 진입구역",user:"도착 가족 · 서비스 차량",value:"차량과 어린이 활동의 구조적 분리",role:"주차 24면 · 서비스 3면 · 전동카트",image:builtin("day")},
           {id:"B",en:"FAMILY HUB",ko:"패밀리 허브",x:31,y:28,purpose:"리셉션과 생활지원 기능을 모은 운영 중심",user:"고객 · 상주관리자",value:"한 명의 관리자가 주요 공간을 확인",role:"체크인 · 매점 · 샤워 · 세탁 · 응급",image:builtin("day")},
           {id:"C",en:"OCEAN TERRACE 01",ko:"오션 테라스 1",x:46,y:20,purpose:"조용한 가족을 위한 상단 5개 객실",user:"영유아 동반 가족",value:"가장 넓은 바다 조망",role:"숙박 · 전용 데크 · 개별 바비큐",image:builtin("terrace")},
@@ -395,30 +406,30 @@
           {id:"G",en:"TIDE HOUSE",ko:"타이드 하우스",x:28,y:51,purpose:"비·폭염·강풍에 대응하는 전천후 라운지",user:"가족 · 소규모 단체",value:"날씨와 무관한 체류 만족도",role:"체험 · 북라운지 · 오션 라운지",image:builtin("tideHouse")},
           {id:"H",en:"SUNSET TABLE",ko:"선셋 테이블",x:65,y:73,purpose:"바다를 향한 예약형 공동 다이닝 데크",user:"숙박 가족 · 이벤트 고객",value:"일몰을 가족의 기억으로 전환",role:"바비큐 · 조식 · 피크닉 부가매출",image:builtin("table")}
         ]},
-        land:{label:"THE LAND",title:"무엇을 살리고 무엇을 해결할 것인가?",keep:["바다 조망","자연 단차","기존 소나무"],solve:["경사지 토목","집중 배수","차량·어린이 동선","강한 해풍"],quote:"“이 부지의 약점인 경사가, 이 사업의 가장 비싼 조망이 됩니다.”",images:{before:image(builtin("before"),620),after:image(builtin("golden"),620)}},
-        guest:{label:"THE GUEST",title:"누가 왜 방문할 것인가?",personaTitle:"4–10세 자녀를 둔 30–40대 부모",personaDetail:"일반 캠핑의 불편은 싫지만, 자연 속 체류와 아이의 야외활동은 원하는 가족.",quote:"아이에게는 자유를, 부모에게는",quoteStrong:"따라다니지 않아도 되는 휴식",needs:[
-          {title:"아이의 모험",detail:"스스로 순환하며 발견하는 350m 자연 놀이터",image:builtin("family")},{title:"부모의 휴식",detail:"따라다니지 않아도 시야 안에 머무는 구조",image:builtin("golden")},{title:"가족의 기억",detail:"바다·일몰·식사가 하나의 하루로 연결",image:builtin("table")}
+        land:{chapter:"근거",label:"THE LAND",title:"무엇을 살리고 무엇을 해결할 것인가?",beforeLabel:"BEFORE · 자연 경사지",afterLabel:"AFTER · 세 개의 조망 테라스",keepKicker:"KEEP · 살릴 것",keepTitle:"땅이 이미 가진 가치",solveKicker:"SOLVE · 해결할 것",solveTitle:"설계가 책임질 문제",keep:["바다 조망","자연 단차","기존 소나무"],solve:["경사지 토목","집중 배수","차량·어린이 동선","강한 해풍"],quote:"“이 부지의 약점인 경사가, 이 사업의 가장 비싼 조망이 됩니다.”",images:{before:image(builtin("before"),620),after:image(builtin("golden"),620)}},
+        guest:{chapter:"사용",label:"THE GUEST",title:"누가 왜 방문할 것인가?",personaKicker:"PRIMARY GUEST",personaTitle:"4–10세 자녀를 둔 30–40대 부모",personaDetail:"일반 캠핑의 불편은 싫지만, 자연 속 체류와 아이의 야외활동은 원하는 가족.",quote:"아이에게는 자유를, 부모에게는",quoteStrong:"따라다니지 않아도 되는 휴식",quoteSuffix:"을 제공합니다.",needs:[
+          {number:"01",title:"아이의 모험",detail:"스스로 순환하며 발견하는 350m 자연 놀이터",image:builtin("family")},{number:"02",title:"부모의 휴식",detail:"따라다니지 않아도 시야 안에 머무는 구조",image:builtin("golden")},{number:"03",title:"가족의 기억",detail:"바다·일몰·식사가 하나의 하루로 연결",image:builtin("table")}
         ],images:{guest:image(builtin("family"),620)}},
-        reason:{label:"THE REASON",title:"왜 다른 캠핑장 대신 이곳을 선택하는가?",differences:[
+        reason:{chapter:"차별",label:"THE REASON",title:"왜 다른 캠핑장 대신 이곳을 선택하는가?",reasonPrefix:"REASON",differences:[
           {number:"01",title:"한 시야 안의 두 장면",detail:"모든 객실에서 아이의 놀이와 바다 조망을 동시에 확보합니다.",image:builtin("family")},
           {number:"02",title:"차량 없는 중심",detail:"체크인 이후 일반 차량은 숙박·놀이 중심구역에 들어오지 않습니다.",image:builtin("day")},
           {number:"03",title:"날씨를 이기는 체류",detail:"타이드 하우스가 비·폭염·강풍에도 가족의 하루를 이어줍니다.",image:builtin("tideHouse")},
           {number:"04",title:"경사가 만든 프리미엄",detail:"세 단의 지붕선을 조정해 앞 객실이 뒤 객실의 바다를 가리지 않습니다.",image:builtin("terrace")}
         ],images:{reason:image(builtin("family"),650)}},
-        business:{label:"THE BUSINESS",title:"누가 어떻게 운영하고 어디에서 돈을 버는가?",operatingTitle:"작게 상주하고,\n필요할 때 확장합니다.",staff:[["01","상주 총괄관리자"],["01","예약 · 고객 · 매점"],["03","주말 · 성수기 청소"]],scenario:"base",scenarios:{
+        business:{chapter:"운영",label:"THE BUSINESS",title:"누가 어떻게 운영하고 어디에서 돈을 버는가?",operatingKicker:"OPERATING MODEL",operatingTitle:"작게 상주하고,\n필요할 때 확장합니다.",simKicker:"LIVE REVENUE SIMULATOR",simTitle:"연간 총매출 시뮬레이션",revenueLabel:"예상 연간 총매출",revenueNote:"가상 예시 · 운영비 미반영",scenarioLabels:{conservative:"보수적",base:"기준",target:"목표"},sliderLabels:{rooms:"운영 객실",adr:"평균 판매가격",occupancy:"가동률",days:"영업일",shop:"팀당 매점 구매",bbqRate:"바비큐 구매율",activityRate:"체험 참여율"},sliderUnits:{rooms:"동",adr:"원",occupancy:"%",days:"일",shop:"원",bbqRate:"%",activityRate:"%"},staff:[["01","상주 총괄관리자"],["01","예약 · 고객 · 매점"],["03","주말 · 성수기 청소"]],scenario:"base",scenarios:{
           conservative:{rooms:14,adr:280000,occupancy:40,days:365,shop:25000,bbqRate:35,activityRate:25},
           base:{rooms:14,adr:320000,occupancy:55,days:365,shop:25000,bbqRate:35,activityRate:25},
           target:{rooms:14,adr:350000,occupancy:68,days:365,shop:25000,bbqRate:35,activityRate:25}
         }},
-        decision:{label:"THE DECISION",title:"어떤 위험이 있고 무엇부터 실행해야 하는가?",gates:[
+        decision:{chapter:"결정",label:"THE DECISION",title:"어떤 위험이 있고 무엇부터 실행해야 하는가?",gatesKicker:"6 DECISION GATES",risksKicker:"RISK MATRIX",riskPrefix:"RISK",responsePrefix:"대응",approvedLabel:"APPROVED",stamp:"HWARIM\nCONDITIONAL GO\nNEXT · GATE 01",approvalNumbers:["01","02","03"],gates:[
           ["01","기초조사","현장·토지·진입·오수·배수"],["02","사전협의","관할기관 인허가"],["03","개략사업비","토목·건축·기반공사"],["04","자금일정","부담금·금융·관광기금"],["05","최종검토","배치·운영·수익성"],["06","실행","인허가·실시설계 착수"]
         ],risks:[
-          {title:"인허가",level:"HIGH",detail:"개발행위·토지전용·건축·오수·진입도로 가능성을 관할기관과 사전 확인합니다.",response:"GATE 2에서 보완조건과 절차를 문서화",gate:1},
-          {title:"경사지 토목비",level:"HIGH",detail:"절·성토, 옹벽, 테라스, 배수 공사비가 증가할 수 있습니다.",response:"최대 객실보다 최소 토목으로 성립하는 1단계 우선 검토",gate:2},
-          {title:"배수·해풍",level:"HIGH",detail:"집중호우 유출과 해풍에 따른 유지관리비를 검증합니다.",response:"테라스별 분산 집수와 내염해 사양 확정",gate:2},
-          {title:"오수·기반시설",level:"MED",detail:"14동 만실 기준 기반시설 규모와 비용이 미확정입니다.",response:"기초조사와 개략 공사비에 동시 반영",gate:0},
-          {title:"금융 일정",level:"MED",detail:"인허가·부담금·대출 실행 시점이 연결되어야 합니다.",response:"GATE 4에서 자금 필요시점과 조달시점 확정",gate:3},
-          {title:"비수기",level:"MED",detail:"겨울과 우천기의 가동률 하락 가능성이 있습니다.",response:"타이드 하우스·체험·단체 프로그램 운영",gate:4}
+          {number:"01",title:"인허가",level:"HIGH",detail:"개발행위·토지전용·건축·오수·진입도로 가능성을 관할기관과 사전 확인합니다.",response:"GATE 2에서 보완조건과 절차를 문서화",gate:1},
+          {number:"02",title:"경사지 토목비",level:"HIGH",detail:"절·성토, 옹벽, 테라스, 배수 공사비가 증가할 수 있습니다.",response:"최대 객실보다 최소 토목으로 성립하는 1단계 우선 검토",gate:2},
+          {number:"03",title:"배수·해풍",level:"HIGH",detail:"집중호우 유출과 해풍에 따른 유지관리비를 검증합니다.",response:"테라스별 분산 집수와 내염해 사양 확정",gate:2},
+          {number:"04",title:"오수·기반시설",level:"MED",detail:"14동 만실 기준 기반시설 규모와 비용이 미확정입니다.",response:"기초조사와 개략 공사비에 동시 반영",gate:0},
+          {number:"05",title:"금융 일정",level:"MED",detail:"인허가·부담금·대출 실행 시점이 연결되어야 합니다.",response:"GATE 4에서 자금 필요시점과 조달시점 확정",gate:3},
+          {number:"06",title:"비수기",level:"MED",detail:"겨울과 우천기의 가동률 하락 가능성이 있습니다.",response:"타이드 하우스·체험·단체 프로그램 운영",gate:4}
         ],approvals:["키즈 패밀리 특화 콘셉트","14동 기준 사전검토 · 개략공사비","관할기관 인허가 사전협의"],footer:"좋은 캠핑장은 시설을 많이 넣는 것이 아니라,",footerStrong:"이 땅에서만 가능한 경험과 지속 가능한 운영을 연결하는 일입니다."}
       }
     });
@@ -434,7 +445,18 @@
     function setDirty(){markDriveDirty(true);clearTimeout(setDirty.t);setDirty.t=setTimeout(persist,450)}
     function safeText(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
     function getSection(id=activeSection){return project.sections[id]}
-    function normalizeProject(input){const base=makeProject();if(!input||typeof input!=="object")return base;const sections={};SECTION_IDS.forEach(id=>{const a=base.sections[id],b=input.sections?.[id]||{};sections[id]={...a,...b,...(("images"in a)||("images"in b)?{images:{...(a.images||{}),...(b.images||{})}}:{})}});return {...base,...input,theme:{...base.theme,...input.theme},settings:{...base.settings,...input.settings},sections}}
+    function normalizeProject(input){
+      const base=makeProject();if(!input||typeof input!=="object")return base;
+      const mergeRows=(defaults,value)=>Array.isArray(value)?value.map((item,i)=>item&&typeof item==="object"&&!Array.isArray(item)&&defaults?.[i]&&typeof defaults[i]==="object"&&!Array.isArray(defaults[i])?{...defaults[i],...item}:item):defaults;
+      const sections={};
+      SECTION_IDS.forEach(id=>{
+        const a=base.sections[id],b=input.sections?.[id]||{},merged={...a,...b,...(("images"in a)||("images"in b)?{images:{...(a.images||{}),...(b.images||{})}}:{})};
+        ["zones","needs","differences","risks"].forEach(key=>{if(Array.isArray(a[key]))merged[key]=mergeRows(a[key],b[key])});
+        ["timeLabels","routeLabels","scenarioLabels","sliderLabels","sliderUnits"].forEach(key=>{if(a[key]||b[key])merged[key]={...(a[key]||{}),...(b[key]||{})}});
+        sections[id]=merged;
+      });
+      return {...base,...input,theme:{...base.theme,...input.theme},settings:{...base.settings,...input.settings,textStyles:{...(base.settings.textStyles||{}),...(input.settings?.textStyles||{})}},sections}
+    }
     function imageObject(key){
       if(key==="map"){const s=getSection("experience"),name=s.time==="sunset"?"mapSunset":s.time==="night"?"mapNight":"mapDay";return s.images[name]||(s.images[name]=image(builtin("day"),650))}
       if(key==="zoneDetail"){const s=getSection("experience"),z=s.zones[selectedZone]||s.zones[0];return z.imageSettings||(z.imageSettings=image(z.image||builtin("day"),280))}
@@ -453,6 +475,7 @@
       const obj=imageObject(key)||{src:srcOverride||"",focalX:50,focalY:50,zoom:1,fit:"cover",height:520};
       const img=frame.querySelector("img"),src=resolveSrc(srcOverride||obj.src);
       if(img.getAttribute("src")!==src)img.src=src;img.style.objectFit=obj.fit||"cover";frame.style.setProperty("--fx",(obj.focalX??50)+"%");frame.style.setProperty("--fy",(obj.focalY??50)+"%");frame.style.setProperty("--zoom",obj.zoom||1);
+      frame.style.setProperty("--frame-x",(obj.frameX||0)+"px");frame.style.setProperty("--frame-y",(obj.frameY||0)+"px");frame.style.width=(obj.frameWidth||100)+"%";
       if(obj.height&&key!=="hero"){frame.style.setProperty("--user-height",obj.height+"px");frame.style.removeProperty("height");const stage=key==="map"?frame.closest(".map-shell"):key==="before"||key==="after"?frame.closest(".compare"):key==="guest"?frame.closest(".guest-visual"):key==="reason"?frame.closest(".reason-visual"):null;if(stage){stage.style.setProperty("--user-height",obj.height+"px");stage.style.removeProperty("height");const layout=key==="map"?stage.closest(".experience-grid"):key==="before"||key==="after"?stage.closest(".land-grid"):key==="guest"?stage.closest(".guest-grid"):key==="reason"?stage.closest(".reason-stage"):null;layout?.style.setProperty("--user-height",obj.height+"px")}}
       img.onerror=()=>{img.style.opacity="0"};img.onload=()=>{img.style.opacity="1"};
     }
@@ -462,9 +485,9 @@
       root.querySelectorAll("[data-edit]").forEach(el=>{const k=el.dataset.edit;if(k in section)el.textContent=section[k]??"";el.contentEditable=document.body.classList.contains("presentation")?"false":"true"});
     }
     function renderNav(){
-      $("#storyNav").innerHTML=CHAPTERS.map((c,i)=>`<button type="button" data-go="${c[0]}" class="${activeSection===c[0]?"is-active":""}"><span>${String(i+1).padStart(2,"0")}</span><b>${c[1]}</b></button>`).join("");
+      $("#storyNav").innerHTML=CHAPTERS.map((c,i)=>`<button type="button" data-go="${c[0]}" class="${activeSection===c[0]?"is-active":""}"><span>${String(i+1).padStart(2,"0")}</span><b>${safeText(getSection(c[0]).chapter||c[1])}</b></button>`).join("");
     }
-    function renderVision(){fillEditable("vision");$("#heroStats").innerHTML=getSection("vision").stats.map(x=>`<div><b>${safeText(x[0])}</b><span>${safeText(x[1])}</span></div>`).join("");applyImage($('[data-image-key="hero"]'),"hero")}
+    function renderVision(){fillEditable("vision");$("#heroStats").innerHTML=getSection("vision").stats.map((x,i)=>`<div><b data-direct data-stat-index="${i}" data-stat-field="0">${safeText(x[0])}</b><span data-direct data-stat-index="${i}" data-stat-field="1">${safeText(x[1])}</span></div>`).join("");applyImage($('[data-image-key="hero"]'),"hero")}
     function routePoints(kind){
       const z=getSection("experience").zones,idx={guest:[0,1,3,5,7,6,4],service:[0,1,2,3,4,7],emergency:[0,2,4,7,6,1,0]}[kind]||[];
       return idx.map(i=>z[i]).filter(Boolean).map(v=>`${v.x},${v.y}`).join(" ")
@@ -475,7 +498,7 @@
       return{tx:Math.min(0,Math.max(rect.width-rect.width*scale,rawTx)),ty:Math.min(0,Math.max(rect.height-rect.height*scale,rawTy)),scale,fx:(zx*100)+"%",fy:(zy*100)+"%"}
     }
     function zoneCameraTransform(p){return`translate3d(${p.tx.toFixed(1)}px,${p.ty.toFixed(1)}px,0) scale(${p.scale})`}
-    function zoneCameraDuration(){return Math.max(2100,(project.settings.motionDuration||1250)*1.65)}
+    function zoneCameraDuration(){const base=project.settings.motionDuration||1250;return Math.round(Math.max(2600,Math.min(3600,base*2.15)))}
     function focusZoneCamera(zone,scale=4.2,{animate=true,staged=true}={}){
       const shell=$("#mapShell"),world=$("#mapWorld"),grid=document.querySelector(".experience-grid");if(!shell||!world)return 0;
       const startTransform=getComputedStyle(world).transform==="none"?"translate3d(0,0,0) scale(1)":getComputedStyle(world).transform;
@@ -486,64 +509,95 @@
       world.style.setProperty("--cam-tx",target.tx.toFixed(1)+"px");world.style.setProperty("--cam-ty",target.ty.toFixed(1)+"px");world.style.setProperty("--cam-scale",String(target.scale));
       if(!animate)return duration;
       let motionClass="";
-      if(zone&&staged){
-        const p1=zoneCameraPose(zone,1.18,shell),p2=zoneCameraPose(zone,2.35,shell);world.style.setProperty("--cam-p1-tx",p1.tx.toFixed(1)+"px");world.style.setProperty("--cam-p1-ty",p1.ty.toFixed(1)+"px");world.style.setProperty("--cam-p1-scale",String(p1.scale));world.style.setProperty("--cam-p2-tx",p2.tx.toFixed(1)+"px");world.style.setProperty("--cam-p2-ty",p2.ty.toFixed(1)+"px");world.style.setProperty("--cam-p2-scale",String(p2.scale));motionClass="is-camera-entering"
-      }else if(!zone){
-        const current=getSection("experience").zones[selectedZone],mid=zoneCameraPose(current,1.75,shell);world.style.setProperty("--cam-return-tx",mid.tx.toFixed(1)+"px");world.style.setProperty("--cam-return-ty",mid.ty.toFixed(1)+"px");world.style.setProperty("--cam-return-scale",String(mid.scale));motionClass="is-camera-returning"
-      }
+      if(zone&&staged)motionClass="is-camera-entering";
+      else if(!zone)motionClass="is-camera-returning";
       if(motionClass){void world.offsetWidth;world.classList.add(motionClass);world._cameraTimer=setTimeout(()=>world.classList.remove(motionClass),duration+80)}
       return duration
     }
     function renderExperience(){
       fillEditable("experience");const s=getSection("experience"),z=s.zones[selectedZone]||s.zones[0];
-      $("#zoneDots").innerHTML=s.zones.map((v,i)=>`<button type="button" class="zone-dot ${zoneDetailOpen&&i===selectedZone?"is-active":""}" style="left:${v.x}%;top:${v.y}%" data-zone="${i}" aria-label="${safeText(v.id+" "+v.ko)}">${safeText(v.id)}</button>`).join("");
-      $("#routeLine").setAttribute("points",routePoints(s.route));$("#routeTabs").innerHTML=[["day","낮"],["sunset","일몰"],["night","야간"]].map(v=>`<button type="button" class="seg ${s.time===v[0]?"is-active":""}" data-time="${v[0]}">${v[1]}</button>`).join("")+[["guest","고객"],["service","관리"],["emergency","비상"]].map(v=>`<button type="button" class="seg ${s.route===v[0]?"is-active":""}" data-route="${v[0]}">${v[1]} 동선</button>`).join("");
-      $("#zoneCopy").innerHTML=`<span>ZONE ${safeText(z.id)} · <i data-direct data-zone-field="en">${safeText(z.en)}</i></span><h3 data-direct data-zone-field="ko">${safeText(z.ko)}</h3><p data-direct data-zone-field="purpose">${safeText(z.purpose)}</p><div class="zone-meta"><div><small>대표 이용자</small><b data-direct data-zone-field="user">${safeText(z.user)}</b></div><div><small>고객 가치</small><b data-direct data-zone-field="value">${safeText(z.value)}</b></div><div><small>운영 · 매출 역할</small><b data-direct data-zone-field="role">${safeText(z.role)}</b></div></div>`;
+      $("#zoneDots").innerHTML=s.zones.map((v,i)=>`<button type="button" class="zone-dot ${zoneDetailOpen&&i===selectedZone?"is-active":""}" style="left:${Number(v.x)||50}%;top:${Number(v.y)||50}%" data-position="${(Number(v.x)||50).toFixed(1)}% · ${(Number(v.y)||50).toFixed(1)}%" data-zone="${i}" aria-label="${safeText(v.id+" "+v.ko)}" title="드래그해 위치 변경 · 클릭해 상세 보기"><span data-direct data-zone-index="${i}" data-zone-field="id" data-text-role="point">${safeText(v.id)}</span></button>`).join("");
+      $("#routeLine").setAttribute("points",routePoints(s.route));$("#routeTabs").innerHTML=[["day",s.timeLabels.day],["sunset",s.timeLabels.sunset],["night",s.timeLabels.night]].map(v=>`<button type="button" class="seg ${s.time===v[0]?"is-active":""}" data-time="${v[0]}"><span data-direct data-control-group="timeLabels" data-control-key="${v[0]}">${safeText(v[1])}</span></button>`).join("")+[["guest",s.routeLabels.guest],["service",s.routeLabels.service],["emergency",s.routeLabels.emergency]].map(v=>`<button type="button" class="seg ${s.route===v[0]?"is-active":""}" data-route="${v[0]}"><span data-direct data-control-group="routeLabels" data-control-key="${v[0]}">${safeText(v[1])}</span></button>`).join("");
+      $("#zoneCopy").innerHTML=`<span><i data-edit="zonePrefix" data-text-role="overlay">${safeText(s.zonePrefix)}</i> <i data-direct data-zone-index="${selectedZone}" data-zone-field="id" data-text-role="overlay">${safeText(z.id)}</i> · <i data-direct data-zone-index="${selectedZone}" data-zone-field="en">${safeText(z.en)}</i></span><h3 data-direct data-zone-index="${selectedZone}" data-zone-field="ko">${safeText(z.ko)}</h3><p data-direct data-zone-index="${selectedZone}" data-zone-field="purpose">${safeText(z.purpose)}</p><div class="zone-meta"><div><small data-edit="userLabel">${safeText(s.userLabel)}</small><b data-direct data-zone-index="${selectedZone}" data-zone-field="user">${safeText(z.user)}</b></div><div><small data-edit="valueLabel">${safeText(s.valueLabel)}</small><b data-direct data-zone-index="${selectedZone}" data-zone-field="value">${safeText(z.value)}</b></div><div><small data-edit="roleLabel">${safeText(s.roleLabel)}</small><b data-direct data-zone-index="${selectedZone}" data-zone-field="role">${safeText(z.role)}</b></div></div>`;
       applyImage($('[data-image-key="map"]'),"map");applyImage($('[data-image-key="zoneDetail"]'),"zoneDetail");document.querySelector(".experience-grid")?.classList.toggle("is-detail",zoneDetailOpen);$("#mapShell")?.classList.toggle("is-inspecting",zoneDetailOpen);
     }
-    function renderLand(){fillEditable("land");const s=getSection("land");$("#keepList").innerHTML=s.keep.map((x,i)=>`<li data-list="keep" data-index="${i}" contenteditable="${!document.body.classList.contains("presentation")}">${safeText(x)}</li>`).join("");$("#solveList").innerHTML=s.solve.map((x,i)=>`<li data-list="solve" data-index="${i}" contenteditable="${!document.body.classList.contains("presentation")}">${safeText(x)}</li>`).join("");applyImage($('[data-image-key="before"]'),"before");applyImage($('[data-image-key="after"]'),"after")}
+    function renderLand(){fillEditable("land");const s=getSection("land");$("#keepList").innerHTML=s.keep.map((x,i)=>`<li data-list="keep" data-index="${i}">${safeText(x)}</li>`).join("");$("#solveList").innerHTML=s.solve.map((x,i)=>`<li data-list="solve" data-index="${i}">${safeText(x)}</li>`).join("");$('[data-image-key="before"] .img-fallback').textContent=s.beforeLabel;$('[data-image-key="after"] .img-fallback').textContent=s.afterLabel;applyImage($('[data-image-key="before"]'),"before");applyImage($('[data-image-key="after"]'),"after")}
     function renderGuest(){
-      fillEditable("guest");const s=getSection("guest");$("#needTabs").innerHTML=s.needs.map((x,i)=>`<button type="button" data-need="${i}" class="${i===selectedNeed?"is-active":""}"><span>0${i+1}</span><b>${safeText(x.title)}</b><small>${safeText(x.detail)}</small></button>`).join("");applyImage($('[data-image-key="guest"]'),"guest")
+      fillEditable("guest");const s=getSection("guest");$("#needTabs").innerHTML=s.needs.map((x,i)=>`<button type="button" data-need="${i}" class="${i===selectedNeed?"is-active":""}"><span data-direct data-need-index="${i}" data-need-field="number" data-text-role="tab">${safeText(x.number||String(i+1).padStart(2,"0"))}</span><b data-direct data-need-index="${i}" data-need-field="title" data-text-role="tab">${safeText(x.title)}</b><small data-direct data-need-index="${i}" data-need-field="detail" data-text-role="tab">${safeText(x.detail)}</small></button>`).join("");$('[data-image-key="guest"] .img-fallback').textContent=s.needs[selectedNeed]?.title||"FAMILY EXPERIENCE";applyImage($('[data-image-key="guest"]'),"guest")
     }
     function renderReason(){
-      fillEditable("reason");const s=getSection("reason"),r=s.differences[selectedReason]||s.differences[0];$("#reasonTabs").innerHTML=s.differences.map((x,i)=>`<button type="button" data-reason="${i}" class="${i===selectedReason?"is-active":""}"><span>${safeText(x.number)}</span><b>${safeText(x.title)}</b></button>`).join("");$("#reasonCopy").innerHTML=`<span>REASON ${safeText(r.number)}</span><h3 data-direct data-reason-field="title">${safeText(r.title)}</h3><p data-direct data-reason-field="detail">${safeText(r.detail)}</p>`;applyImage($('[data-image-key="reason"]'),"reason")
+      fillEditable("reason");const s=getSection("reason"),r=s.differences[selectedReason]||s.differences[0];$("#reasonTabs").innerHTML=s.differences.map((x,i)=>`<button type="button" data-reason="${i}" class="${i===selectedReason?"is-active":""}"><span data-direct data-reason-index="${i}" data-reason-field="number" data-text-role="tab">${safeText(x.number)}</span><b data-direct data-reason-index="${i}" data-reason-field="title" data-text-role="tab">${safeText(x.title)}</b></button>`).join("");$("#reasonCopy").innerHTML=`<span><i data-edit="reasonPrefix" data-text-role="overlay">${safeText(s.reasonPrefix)}</i> <i data-direct data-reason-index="${selectedReason}" data-reason-field="number" data-text-role="overlay">${safeText(r.number)}</i></span><h3 data-direct data-reason-index="${selectedReason}" data-reason-field="title" data-text-role="overlay">${safeText(r.title)}</h3><p data-direct data-reason-index="${selectedReason}" data-reason-field="detail" data-text-role="overlay">${safeText(r.detail)}</p>`;$('[data-image-key="reason"] .img-fallback').textContent=`${s.reasonPrefix} · ${r.title}`;applyImage($('[data-image-key="reason"]'),"reason")
     }
     const sliderDefs={rooms:["운영 객실",8,24,1,"동"],adr:["평균 판매가격",180000,600000,10000,"원"],occupancy:["가동률",20,90,1,"%"],days:["영업일",200,365,1,"일"],shop:["팀당 매점 구매",0,60000,5000,"원"],bbqRate:["바비큐 구매율",0,80,5,"%"],activityRate:["체험 참여율",0,80,5,"%"]};
     function revenue(v){const stays=v.rooms*v.days*(v.occupancy/100),room=stays*v.adr,shop=stays*v.shop,bbq=stays*(v.bbqRate/100)*65000,act=stays*(v.activityRate/100)*15000;return room+shop+bbq+act}
     function money(v){return v>=1e8?(v/1e8).toFixed(1)+"억원":Math.round(v/1e4).toLocaleString("ko-KR")+"만원"}
     function renderBusiness(){
-      fillEditable("business");const s=getSection("business"),v=s.scenarios[s.scenario];$("#staffList").innerHTML=s.staff.map((x,i)=>`<div><b data-direct data-staff-index="${i}" data-staff-field="0">${safeText(x[0])}</b><span data-direct data-staff-index="${i}" data-staff-field="1">${safeText(x[1])}</span></div>`).join("");$("#scenarioTabs").innerHTML=[["conservative","보수적"],["base","기준"],["target","목표"]].map(x=>`<button type="button" data-scenario="${x[0]}" class="${s.scenario===x[0]?"is-active":""}">${x[1]}</button>`).join("");$("#sliders").innerHTML=Object.entries(sliderDefs).map(([k,d])=>`<div class="slider"><label>${d[0]}<output>${Number(v[k]).toLocaleString()}${d[4]}</output></label><input type="range" data-slider="${k}" min="${d[1]}" max="${d[2]}" step="${d[3]}" value="${v[k]}"></div>`).join("");$("#revenueTotal").textContent=money(revenue(v))
+      fillEditable("business");const s=getSection("business"),v=s.scenarios[s.scenario];$("#staffList").innerHTML=s.staff.map((x,i)=>`<div><b data-direct data-staff-index="${i}" data-staff-field="0">${safeText(x[0])}</b><span data-direct data-staff-index="${i}" data-staff-field="1">${safeText(x[1])}</span></div>`).join("");$("#scenarioTabs").innerHTML=[["conservative",s.scenarioLabels.conservative],["base",s.scenarioLabels.base],["target",s.scenarioLabels.target]].map(x=>`<button type="button" data-scenario="${x[0]}" class="${s.scenario===x[0]?"is-active":""}"><span data-direct data-control-group="scenarioLabels" data-control-key="${x[0]}">${safeText(x[1])}</span></button>`).join("");$("#sliders").innerHTML=Object.entries(sliderDefs).map(([k,d])=>`<div class="slider"><label><span data-direct data-slider-label="${k}">${safeText(s.sliderLabels[k]||d[0])}</span><output><span data-slider-value="${k}">${Number(v[k]).toLocaleString()}</span><i data-direct data-slider-unit="${k}" style="font-style:normal">${safeText(s.sliderUnits[k]||d[4])}</i></output></label><input type="range" data-slider="${k}" min="${d[1]}" max="${d[2]}" step="${d[3]}" value="${v[k]}"></div>`).join("");$("#revenueTotal").textContent=money(revenue(v))
     }
     function renderDecision(){
-      fillEditable("decision");const s=getSection("decision"),r=s.risks[selectedRisk]||s.risks[0];$("#gateList").innerHTML=s.gates.map((x,i)=>`<li class="${i===r.gate?"is-linked":""}"><span>${safeText(x[0])}</span><div><b data-direct data-gate-index="${i}" data-gate-field="1">${safeText(x[1])}</b><small data-direct data-gate-index="${i}" data-gate-field="2">${safeText(x[2])}</small></div></li>`).join("");$("#riskTabs").innerHTML=s.risks.map((x,i)=>`<button type="button" data-risk="${i}" class="${i===selectedRisk?"is-active":""}">${safeText(x.title)}</button>`).join("");$("#riskSheet").innerHTML=`<span>RISK ${String(selectedRisk+1).padStart(2,"0")} · ${safeText(r.level)}</span><h3 data-direct data-risk-field="title">${safeText(r.title)}</h3><p data-direct data-risk-field="detail">${safeText(r.detail)}</p><b data-direct data-risk-field="response">대응 · ${safeText(r.response)}</b>`;$("#approvalList").innerHTML=s.approvals.map((x,i)=>`<button type="button" data-approval="${i}"><span>0${i+1}</span><b data-direct data-approval-index="${i}">${safeText(x)}</b></button>`).join("")
+      fillEditable("decision");const s=getSection("decision"),r=s.risks[selectedRisk]||s.risks[0];$("#gateList").innerHTML=s.gates.map((x,i)=>`<li class="${i===r.gate?"is-linked":""}"><span data-direct data-gate-index="${i}" data-gate-field="0">${safeText(x[0])}</span><div><b data-direct data-gate-index="${i}" data-gate-field="1">${safeText(x[1])}</b><small data-direct data-gate-index="${i}" data-gate-field="2">${safeText(x[2])}</small></div></li>`).join("");$("#riskTabs").innerHTML=s.risks.map((x,i)=>`<button type="button" data-risk="${i}" class="${i===selectedRisk?"is-active":""}"><span data-direct data-risk-index="${i}" data-risk-field="title" data-text-role="tab">${safeText(x.title)}</span></button>`).join("");$("#riskSheet").innerHTML=`<span><i data-edit="riskPrefix" style="font-style:normal">${safeText(s.riskPrefix)}</i> <i data-direct data-risk-index="${selectedRisk}" data-risk-field="number" style="font-style:normal">${safeText(r.number||String(selectedRisk+1).padStart(2,"0"))}</i> · <i data-direct data-risk-index="${selectedRisk}" data-risk-field="level" style="font-style:normal">${safeText(r.level)}</i></span><h3 data-direct data-risk-index="${selectedRisk}" data-risk-field="title" data-text-role="overlay">${safeText(r.title)}</h3><p data-direct data-risk-index="${selectedRisk}" data-risk-field="detail">${safeText(r.detail)}</p><b><i data-edit="responsePrefix" style="font-style:normal">${safeText(s.responsePrefix)}</i> · <i data-direct data-risk-index="${selectedRisk}" data-risk-field="response" style="font-style:normal">${safeText(r.response)}</i></b>`;$("#approvalList").innerHTML=s.approvals.map((x,i)=>`<button type="button" data-approval="${i}"><span data-direct data-approval-number-index="${i}">${safeText(s.approvalNumbers?.[i]||String(i+1).padStart(2,"0"))}</span><b data-direct data-approval-index="${i}">${safeText(x)}</b><em class="approval-label" data-edit="approvedLabel" data-text-role="approval">${safeText(s.approvedLabel)}</em></button>`).join("")
     }
-    function clearInspectorSelection(){$("#inspector")?.classList.remove("is-open");$("#textInspector")?.classList.remove("is-open");$$(".media-frame.is-selected").forEach(x=>x.classList.remove("is-selected"));selectedFrame=null;selectedImageKey="";selectedText=null;selectedTextId=""}
+    function clearInspectorSelection(){$("#inspector")?.classList.remove("is-open");$("#textInspector")?.classList.remove("is-open");$$(".media-frame.is-selected").forEach(x=>x.classList.remove("is-selected"));selectedText?.classList.remove("is-text-selected");$("#moveHandle")?.classList.remove("is-open","is-dragging");selectedFrame=null;selectedImageKey="";selectedText=null;selectedTextId=""}
     function renderAll(){clearInspectorSelection();applyTheme();renderNav();renderVision();renderExperience();renderLand();renderGuest();renderReason();renderBusiness();renderDecision();setupReveals();setEditability()}
     function textLayoutId(el){
       const sid=el.closest("[data-section]")?.dataset.section||activeSection;
-      if(el.dataset.edit)return `${sid}.${el.dataset.edit}`;
-      if(el.dataset.list)return `${sid}.${el.dataset.list}.${el.dataset.index}`;
-      if(el.dataset.zoneField)return `experience.zones.${selectedZone}.${el.dataset.zoneField}`;
-      if(el.dataset.reasonField)return `reason.differences.${selectedReason}.${el.dataset.reasonField}`;
-      if(el.dataset.staffIndex)return `business.staff.${el.dataset.staffIndex}.${el.dataset.staffField}`;
-      if(el.dataset.gateIndex)return `decision.gates.${el.dataset.gateIndex}.${el.dataset.gateField}`;
-      if(el.dataset.riskField)return `decision.risks.${selectedRisk}.${el.dataset.riskField}`;
-      if(el.dataset.approvalIndex)return `decision.approvals.${el.dataset.approvalIndex}`;
+      const role=el.dataset.textRole?`.${el.dataset.textRole}`:"";
+      if(el.dataset.edit)return `${sid}.${el.dataset.edit}${role}`;
+      if(el.dataset.list)return `${sid}.${el.dataset.list}.${el.dataset.index}${role}`;
+      if(el.dataset.statIndex!==undefined)return `vision.stats.${el.dataset.statIndex}.${el.dataset.statField}${role}`;
+      if(el.dataset.zoneField)return `experience.zones.${el.dataset.zoneIndex??selectedZone}.${el.dataset.zoneField}${role}`;
+      if(el.dataset.controlGroup)return `${sid}.${el.dataset.controlGroup}.${el.dataset.controlKey}${role}`;
+      if(el.dataset.needIndex!==undefined)return `guest.needs.${el.dataset.needIndex}.${el.dataset.needField}${role}`;
+      if(el.dataset.reasonField)return `reason.differences.${el.dataset.reasonIndex??selectedReason}.${el.dataset.reasonField}${role}`;
+      if(el.dataset.staffIndex!==undefined)return `business.staff.${el.dataset.staffIndex}.${el.dataset.staffField}${role}`;
+      if(el.dataset.sliderLabel)return `business.sliderLabels.${el.dataset.sliderLabel}${role}`;
+      if(el.dataset.sliderUnit)return `business.sliderUnits.${el.dataset.sliderUnit}${role}`;
+      if(el.dataset.gateIndex!==undefined)return `decision.gates.${el.dataset.gateIndex}.${el.dataset.gateField}${role}`;
+      if(el.dataset.riskField)return `decision.risks.${el.dataset.riskIndex??selectedRisk}.${el.dataset.riskField}${role}`;
+      if(el.dataset.approvalNumberIndex!==undefined)return `decision.approvalNumbers.${el.dataset.approvalNumberIndex}${role}`;
+      if(el.dataset.approvalIndex!==undefined)return `decision.approvals.${el.dataset.approvalIndex}${role}`;
       return `${sid}.text`;
     }
     function applyTextLayout(el){
-      const s=project.settings.textStyles?.[textLayoutId(el)];if(!s)return;
+      const s=project.settings.textStyles?.[textLayoutId(el)]||{};
       el.style.fontSize=s.fontSize?s.fontSize+"px":"";el.style.width=s.width?s.width+"%":"";el.style.display=s.width?"block":"";el.style.position=s.x||s.y?"relative":"";el.style.left=s.x?s.x+"px":"";el.style.top=s.y?s.y+"px":"";el.style.textAlign=s.align||"";
     }
     function setEditability(){const editable=!document.body.classList.contains("presentation");$$("[data-edit],[data-list],[data-direct]").forEach(el=>{el.contentEditable=String(editable);applyTextLayout(el)})}
     function selectText(el){
-      selectedText=el;selectedTextId=textLayoutId(el);$("#inspector").classList.remove("is-open");selectedFrame?.classList.remove("is-selected");
+      selectedText?.classList.remove("is-text-selected");selectedText=el;selectedText.classList.add("is-text-selected");selectedTextId=textLayoutId(el);$("#inspector").classList.remove("is-open");selectedFrame?.classList.remove("is-selected");selectedFrame=null;selectedImageKey="";
       const cs=getComputedStyle(el),stored=project.settings.textStyles?.[selectedTextId]||{},size=stored.fontSize||Math.round(parseFloat(cs.fontSize))||16,width=stored.width||100,x=stored.x||0,y=stored.y||0,align=stored.align||cs.textAlign||"left";
-      $("#fontSizeRange").value=size;$("#textWidthRange").value=width;$("#textXRange").value=x;$("#textYRange").value=y;$("#fontSizeOut").value=size+"px";$("#textWidthOut").value=width+"%";$("#textXOut").value=x+"px";$("#textYOut").value=y+"px";$$("[data-align]").forEach(b=>b.classList.toggle("is-active",b.dataset.align===align));$("#textInspector").classList.add("is-open");
+      $("#fontSizeRange").value=size;$("#textWidthRange").value=width;$("#textXRange").value=x;$("#textYRange").value=y;$("#fontSizeOut").value=size+"px";$("#textWidthOut").value=width+"%";$("#textXOut").value=x+"px";$("#textYOut").value=y+"px";$$("[data-align]").forEach(b=>b.classList.toggle("is-active",b.dataset.align===align));$("#textInspector").classList.add("is-open");positionMoveHandle();
     }
     function updateTextStyle(prop,value){
       if(!selectedText||!selectedTextId)return;project.settings.textStyles=project.settings.textStyles||{};const s=project.settings.textStyles[selectedTextId]||(project.settings.textStyles[selectedTextId]={});s[prop]=value;applyTextLayout(selectedText);selectText(selectedText);setDirty();
     }
+    function positionMoveHandle(){
+      const handle=$("#moveHandle"),target=selectedText?.isConnected?selectedText:selectedFrame?.isConnected?selectedFrame:null;
+      if(!handle||!target||document.body.classList.contains("presentation")){handle?.classList.remove("is-open");return}
+      const r=target.getBoundingClientRect();if(r.bottom<72||r.top>innerHeight||r.right<0||r.left>innerWidth){handle.classList.remove("is-open");return}
+      handle.classList.add("is-open");const w=handle.offsetWidth||70,h=handle.offsetHeight||32,left=Math.max(10,Math.min(innerWidth-w-10,r.left+8)),top=r.top>82?Math.max(76,r.top-h-8):Math.min(innerHeight-h-10,r.bottom+8);handle.style.left=left+"px";handle.style.top=top+"px";
+    }
+    function syncRange(id,value,outId,suffix){const input=$("#"+id),out=$("#"+outId);if(input)input.value=value;if(out)out.value=Math.round(value)+suffix}
+    let layoutDrag=null;
+    $("#moveHandle").addEventListener("pointerdown",e=>{
+      const type=selectedText?.isConnected?"text":selectedFrame?.isConnected?"image":"";if(!type||document.body.classList.contains("presentation"))return;
+      e.preventDefault();e.stopPropagation();const target=type==="text"?selectedText:selectedFrame,base=type==="text"?(project.settings.textStyles[selectedTextId]||(project.settings.textStyles[selectedTextId]={})):imageObject(selectedImageKey);
+      layoutDrag={type,target,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:Number(base.x??base.frameX??0),y:Number(base.y??base.frameY??0)};$("#moveHandle").classList.add("is-dragging");$("#moveHandle").setPointerCapture?.(e.pointerId);
+    });
+    $("#moveHandle").addEventListener("pointermove",e=>{
+      if(!layoutDrag||e.pointerId!==layoutDrag.pointerId)return;e.preventDefault();
+      const x=Math.max(layoutDrag.type==="text"?-500:-360,Math.min(layoutDrag.type==="text"?500:360,layoutDrag.x+e.clientX-layoutDrag.startX)),y=Math.max(layoutDrag.type==="text"?-320:-260,Math.min(layoutDrag.type==="text"?320:260,layoutDrag.y+e.clientY-layoutDrag.startY));
+      if(layoutDrag.type==="text"){
+        const s=project.settings.textStyles[selectedTextId]||(project.settings.textStyles[selectedTextId]={});s.x=Math.round(x);s.y=Math.round(y);applyTextLayout(selectedText);syncRange("textXRange",s.x,"textXOut","px");syncRange("textYRange",s.y,"textYOut","px")
+      }else{
+        const apply=(key,obj)=>{obj.frameX=Math.round(x);obj.frameY=Math.round(y);applyImage($(`[data-image-key="${key}"]`),key)};
+        if(["before","after"].includes(selectedImageKey)){const images=getSection("land").images;apply("before",images.before);apply("after",images.after)}else{const o=imageObject(selectedImageKey);o.frameX=Math.round(x);o.frameY=Math.round(y);applyImage(selectedFrame,selectedImageKey)}
+        syncRange("frameXRange",x,"frameXOut","px");syncRange("frameYRange",y,"frameYOut","px")
+      }
+      positionMoveHandle();
+    });
+    function finishLayoutDrag(e){if(!layoutDrag)return;try{$("#moveHandle").releasePointerCapture?.(layoutDrag.pointerId)}catch{}layoutDrag=null;$("#moveHandle").classList.remove("is-dragging");positionMoveHandle();setDirty()}
+    $("#moveHandle").addEventListener("pointerup",finishLayoutDrag);$("#moveHandle").addEventListener("pointercancel",finishLayoutDrag);
     function revealVisible(){const h=innerHeight;$$(".reveal").forEach(x=>{const r=x.getBoundingClientRect();if(r.top<h*.94&&r.bottom>0)x.classList.add("is-visible")})}
     function playSceneMotion(id){const scene=document.getElementById(id);if(!scene)return;const items=[...scene.querySelectorAll(".reveal")];scene.classList.remove("is-entering");items.forEach((x,i)=>{x.style.setProperty("--reveal-index",i);x.classList.remove("is-visible")});void scene.offsetWidth;scene.classList.add("is-entering");requestAnimationFrame(()=>requestAnimationFrame(()=>items.forEach(x=>x.classList.add("is-visible"))));clearTimeout(scene._entryTimer);scene._entryTimer=setTimeout(()=>scene.classList.remove("is-entering"),Math.max(1500,(project.settings.motionDuration||1250)+items.length*120))}
     function setActiveScene(id,replay=false){if(!SECTION_IDS.includes(id))return;activeSection=id;const activeIndex=SECTION_IDS.indexOf(id);$$(".scene").forEach(scene=>{const index=SECTION_IDS.indexOf(scene.id);scene.classList.toggle("is-current",index===activeIndex);scene.classList.toggle("is-before",index<activeIndex);scene.classList.toggle("is-after",index>activeIndex)});renderNav();updateProgress();if(replay)playSceneMotion(id)}
@@ -552,12 +606,12 @@
     function go(id){if(!SECTION_IDS.includes(id))return;const presenting=document.body.classList.contains("presentation");if(!presenting&&id!==activeSection)clearInspectorSelection();if(presenting&&id!==activeSection){if(navigationLock)return;const fromIndex=SECTION_IDS.indexOf(activeSection),toIndex=SECTION_IDS.indexOf(id);navigationLock=true;navigationTarget=id;document.body.dataset.slideDirection=toIndex>fromIndex?"next":"previous";performGo(id,"auto",true);clearTimeout(go.end);go.end=setTimeout(()=>{navigationLock=false;navigationTarget=""},Math.max(850,(project.settings.motionDuration||1250)*.86));return}performGo(id,presenting?"auto":"smooth",presenting)}
     function updateProgress(){const i=SECTION_IDS.indexOf(activeSection);$("#progressBar").style.width=((i+1)/7*100)+"%";$("#progressText").textContent=String(i+1).padStart(2,"0")+" / 07"}
     function selectImage(frame){
-      if(document.body.classList.contains("presentation"))return;$("#textInspector").classList.remove("is-open");$$(".media-frame").forEach(x=>x.classList.remove("is-selected"));frame.classList.add("is-selected");selectedFrame=frame;selectedImageKey=frame.dataset.imageKey;const o=imageObject(selectedImageKey);if(!o)return;
+      if(document.body.classList.contains("presentation"))return;$("#textInspector").classList.remove("is-open");selectedText?.classList.remove("is-text-selected");selectedText=null;selectedTextId="";$$(".media-frame").forEach(x=>x.classList.remove("is-selected"));frame.classList.add("is-selected");selectedFrame=frame;selectedImageKey=frame.dataset.imageKey;const o=imageObject(selectedImageKey);if(!o)return;
       $("#inspectorTitle").textContent=({hero:"첫 화면",map:"전체 조감도",zoneDetail:"공간 참고",before:"개발 전",after:"개발 후",guest:"가족 경험",reason:"선택 이유"}[selectedImageKey]||"이미지");$("#heightControl").hidden=["hero","zoneDetail"].includes(selectedImageKey);
-      $("#zoomRange").value=Math.round((o.zoom||1)*100);$("#heightRange").value=o.height||520;$("#focusXRange").value=o.focalX??50;$("#focusYRange").value=o.focalY??50;updateInspectorLabels();$$("[data-fit]").forEach(b=>b.classList.toggle("is-active",b.dataset.fit===(o.fit||"cover")));$("#inspector").classList.add("is-open")
+      $("#zoomRange").value=Math.round((o.zoom||1)*100);$("#heightRange").value=o.height||520;$("#frameWidthRange").value=o.frameWidth||100;$("#frameXRange").value=o.frameX||0;$("#frameYRange").value=o.frameY||0;$("#focusXRange").value=o.focalX??50;$("#focusYRange").value=o.focalY??50;updateInspectorLabels();$$("[data-fit]").forEach(b=>b.classList.toggle("is-active",b.dataset.fit===(o.fit||"cover")));$("#inspector").classList.add("is-open");positionMoveHandle()
     }
-    function updateInspectorLabels(){const o=imageObject(selectedImageKey);if(!o)return;$("#zoomOut").value=Math.round((o.zoom||1)*100)+"%";$("#heightOut").value=(o.height||520)+"px";$("#focusXOut").value=Math.round(o.focalX??50)+"%";$("#focusYOut").value=Math.round(o.focalY??50)+"%"}
-    function updateSelected(prop,val){const o=imageObject(selectedImageKey);if(!o||!selectedFrame)return;if(prop==="height"&&["before","after"].includes(selectedImageKey)){const images=getSection("land").images;images.before.height=val;images.after.height=val;applyImage($('[data-image-key="before"]'),"before");applyImage($('[data-image-key="after"]'),"after")}else{o[prop]=val;applyImage(selectedFrame,selectedImageKey)}updateInspectorLabels();setDirty()}
+    function updateInspectorLabels(){const o=imageObject(selectedImageKey);if(!o)return;$("#zoomOut").value=Math.round((o.zoom||1)*100)+"%";$("#heightOut").value=(o.height||520)+"px";$("#frameWidthOut").value=Math.round(o.frameWidth||100)+"%";$("#frameXOut").value=Math.round(o.frameX||0)+"px";$("#frameYOut").value=Math.round(o.frameY||0)+"px";$("#focusXOut").value=Math.round(o.focalX??50)+"%";$("#focusYOut").value=Math.round(o.focalY??50)+"%";positionMoveHandle()}
+    function updateSelected(prop,val){const o=imageObject(selectedImageKey);if(!o||!selectedFrame)return;if(["height","frameWidth","frameX","frameY"].includes(prop)&&["before","after"].includes(selectedImageKey)){const images=getSection("land").images;images.before[prop]=val;images.after[prop]=val;applyImage($('[data-image-key="before"]'),"before");applyImage($('[data-image-key="after"]'),"after")}else{o[prop]=val;applyImage(selectedFrame,selectedImageKey)}updateInspectorLabels();setDirty()}
     async function compressImage(file){
       const url=URL.createObjectURL(file);try{const img=await new Promise((res,rej)=>{const i=new Image;i.onload=()=>res(i);i.onerror=rej;i.src=url});const scale=Math.min(1,1920/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*scale);c.height=Math.round(img.naturalHeight*scale);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return await new Promise(res=>c.toBlob(async b=>res({blob:b,base64:(await blobDataUrl(b)).split(",")[1],dataUrl:await blobDataUrl(b),mimeType:"image/jpeg",fileName:(file.name.replace(/\.[^.]+$/,"")||"image")+".jpg"}),"image/jpeg",.84))}finally{URL.revokeObjectURL(url)}
     }
@@ -569,7 +623,7 @@
     function adminKey(){const field=$("#adminKeyField");const key=String(field?.value||sessionStorage.getItem("hwarim-admin-key")||localStorage.getItem("hwarim-admin-key")||"").trim();if(key){localStorage.setItem("hwarim-admin-key",key);return key}$("#settings").classList.add("is-open");toast("관리자 키를 입력하세요.",true);return ""}
     const pending=new Map();
     function gas(action,{projectId=project.projectId,projectName=project.projectName,data={},admin=false}={}){
-      const url=gasUrl();if(!url||url===DEFAULT_APPS_SCRIPT_URL)return Promise.reject(new Error("Apps Script 웹 앱 URL을 먼저 입력하세요."));localStorage.setItem("hwarim-gas-url",url);
+      const url=gasUrl();if(!url)return Promise.reject(new Error("Apps Script 웹 앱 URL을 먼저 입력하세요."));localStorage.setItem("hwarim-gas-url",url);
       const requestId="web-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2),payload={channel:"hwarim-drive-v1",requestId,action,adminKey:admin?adminKey():"",projectId,projectName,data};
       if(admin&&!payload.adminKey)return Promise.reject(new Error("관리자 키가 필요합니다."));
       $("#gasForm").action=url;$("#gasPayload").value=JSON.stringify(payload);
@@ -599,15 +653,16 @@
     async function saveDrive(){try{toast("이미지와 프로젝트를 저장하는 중…");await uploadPendingMedia();project.updatedAt=new Date().toISOString();const full=projectExport(),sections=full.sections;delete full.sections;const r=await gas("saveProject",{admin:true,data:{project:full,sections}});project.revision=r?.revision||project.revision;persist();markDriveDirty(false);toast(`Drive 저장 완료${r?.revision?" · revision "+r.revision:""}`);await listProjects()}catch(e){toast(e.message,true)}}
     async function listProjects(){try{const r=await gas("listProjects",{admin:true}),list=r.projects||r.items||r||[];$("#projectSelect").innerHTML='<option value="">Drive 프로젝트 선택</option>'+list.map(x=>`<option value="${safeText(x.projectId||x.id)}">${safeText(x.projectName||x.name||x.projectId)}</option>`).join("");return list}catch(e){toast(e.message,true);return[]}}
     async function loadDrive(id=$("#projectSelect").value){if(!id){toast("Drive 프로젝트를 선택하세요.",true);return false}if(dirty&&!confirm("Drive에 저장하지 않은 변경이 있습니다. 현재 내용을 버리고 프로젝트를 불러올까요?"))return false;try{toast("프로젝트와 이미지를 불러오는 중…");const r=await gas("loadProject",{projectId:id,data:{}}),loaded=r.project?{...r.project,sections:r.sections||r.project.sections}:r;await hydrateDriveMedia(loaded);project=normalizeProject(loaded);project.revision=r.revision||project.revision;selectedZone=3;zoneDetailOpen=false;selectedNeed=0;selectedReason=0;selectedRisk=0;persist();markDriveDirty(false);renderAll();toast("프로젝트를 불러왔습니다.");return true}catch(e){toast(e.message,true);return false}}
-    function setPresentation(on){const current=document.body.classList.contains("presentation");if(current===on)return;document.body.classList.toggle("presentation",on);project.settings.presentation=on;setEditability();$("#presentBtn").textContent=on?"편집 모드로":"발표 모드 ▶";if(on){$("#inspector").classList.remove("is-open");$("#textInspector").classList.remove("is-open");if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});requestAnimationFrame(()=>go("vision"))}else{navigationLock=false;navigationTarget="";if(document.fullscreenElement)document.exitFullscreen?.();requestAnimationFrame(()=>document.getElementById(activeSection)?.scrollIntoView({behavior:"auto",block:"start"}))}persist()}
+    function setPresentation(on){const current=document.body.classList.contains("presentation");if(current===on)return;document.body.classList.toggle("presentation",on);project.settings.presentation=on;setEditability();$("#presentBtn").textContent=on?"편집 모드로":"발표 모드 ▶";if(on){clearInspectorSelection();if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});requestAnimationFrame(()=>go("vision"))}else{navigationLock=false;navigationTarget="";if(document.fullscreenElement)document.exitFullscreen?.();requestAnimationFrame(()=>document.getElementById(activeSection)?.scrollIntoView({behavior:"auto",block:"start"}))}persist()}
+    let zoneDrag=null,ignoreZoneClickUntil=0;
     document.addEventListener("click",e=>{
       const textTarget=e.target.closest("[data-edit],[data-list],[data-direct]");if(textTarget&&!document.body.classList.contains("presentation")){selectText(textTarget);return}
       const goBtn=e.target.closest("[data-go]");if(goBtn)go(goBtn.dataset.go);
       const frame=e.target.closest(".media-frame[data-image-key]");if(frame&&!document.body.classList.contains("presentation"))selectImage(frame);
-      const z=e.target.closest("[data-zone]");if(z){const wasOpen=zoneDetailOpen;if(wasOpen)prepareImageTransition($('[data-image-key="zoneDetail"]'));clearInspectorSelection();selectedZone=+z.dataset.zone;zoneDetailOpen=true;const zone=getSection("experience").zones[selectedZone],shell=$("#mapShell"),grid=document.querySelector(".experience-grid"),cameraMs=zoneCameraDuration();renderExperience();if(!wasOpen)grid?.classList.remove("is-detail");shell.classList.remove("is-leaving-zone");shell.classList.add("is-inspecting");requestAnimationFrame(()=>requestAnimationFrame(()=>{focusZoneCamera(zone,4.35,{animate:true,staged:!wasOpen});replayEffect(shell,"is-entering-zone",cameraMs)}));clearTimeout(grid?._detailTimer);const reveal=()=>{grid?.classList.add("is-detail");replayEffect($("#zoneSheet"),"is-switching",Math.max(1500,(project.settings.motionDuration||1250)*1.35))};if(wasOpen)reveal();else if(grid)grid._detailTimer=setTimeout(reveal,Math.round(cameraMs*.82));setEditability()}
+      const z=e.target.closest("[data-zone]");if(z){if(performance.now()<ignoreZoneClickUntil)return;const wasOpen=zoneDetailOpen;if(wasOpen)prepareImageTransition($('[data-image-key="zoneDetail"]'));clearInspectorSelection();selectedZone=+z.dataset.zone;zoneDetailOpen=true;const zone=getSection("experience").zones[selectedZone],shell=$("#mapShell"),grid=document.querySelector(".experience-grid"),cameraMs=zoneCameraDuration();renderExperience();if(!wasOpen)grid?.classList.remove("is-detail");shell.classList.remove("is-leaving-zone");shell.classList.add("is-inspecting");requestAnimationFrame(()=>requestAnimationFrame(()=>{focusZoneCamera(zone,4.35,{animate:true,staged:!wasOpen});replayEffect(shell,"is-entering-zone",cameraMs)}));clearTimeout(grid?._detailTimer);const reveal=()=>{grid?.classList.add("is-detail");replayEffect($("#zoneSheet"),"is-switching",Math.max(1500,(project.settings.motionDuration||1250)*1.35))};if(wasOpen)reveal();else if(grid)grid._detailTimer=setTimeout(reveal,Math.round(cameraMs*.74));setEditability()}
       const tm=e.target.closest("[data-time]");if(tm){prepareImageTransition($('[data-image-key="map"]'));clearInspectorSelection();getSection("experience").time=tm.dataset.time;renderExperience();replayEffect($("#mapShell"),"is-tone-switching",1150);setEditability();setDirty()}
       const rt=e.target.closest("[data-route]");if(rt){clearInspectorSelection();getSection("experience").route=rt.dataset.route;renderExperience();replayEffect($("#routeLine"),"is-route-switching",1900);setEditability();setDirty()}
-      const n=e.target.closest("[data-need]");if(n){prepareImageTransition($('[data-image-key="guest"]'));clearInspectorSelection();selectedNeed=+n.dataset.need;renderGuest();replayEffect(document.querySelector(".guest-visual"),"is-switching",1300)}
+      const n=e.target.closest("[data-need]");if(n){prepareImageTransition($('[data-image-key="guest"]'));clearInspectorSelection();selectedNeed=+n.dataset.need;renderGuest();replayEffect(document.querySelector(".guest-visual"),"is-switching",1300);setEditability()}
       const r=e.target.closest("[data-reason]");if(r){prepareImageTransition($('[data-image-key="reason"]'));clearInspectorSelection();selectedReason=+r.dataset.reason;renderReason();replayEffect(document.querySelector(".reason-visual"),"is-switching",1400);setEditability()}
       const sc=e.target.closest("[data-scenario]");if(sc){clearInspectorSelection();getSection("business").scenario=sc.dataset.scenario;renderBusiness();replayEffect(document.querySelector(".simulator"),"is-switching",900);setEditability();setDirty()}
       const risk=e.target.closest("[data-risk]");if(risk){clearInspectorSelection();selectedRisk=+risk.dataset.risk;renderDecision();replayEffect($("#riskSheet"),"is-switching",900);setEditability()}
@@ -615,29 +670,44 @@
       const fit=e.target.closest("[data-fit]");if(fit){updateSelected("fit",fit.dataset.fit);$$("[data-fit]").forEach(b=>b.classList.toggle("is-active",b===fit))}
     });
     document.addEventListener("input",e=>{
-      const el=e.target;if(el.matches("[data-edit]")){getSection(el.closest("[data-section]").dataset.section)[el.dataset.edit]=el.textContent;setDirty()}
+      const el=e.target;if(el.matches("[data-edit]")){const section=getSection(el.closest("[data-section]").dataset.section);section[el.dataset.edit]=el.textContent;if(el.dataset.edit==="chapter")renderNav();if(el.dataset.edit==="approvedLabel")$$('[data-edit="approvedLabel"]').forEach(peer=>{if(peer!==el)peer.textContent=el.textContent});setDirty()}
       if(el.matches("[data-list]")){getSection(el.closest("[data-section]").dataset.section)[el.dataset.list][+el.dataset.index]=el.textContent;setDirty()}
-      if(el.matches("[data-zone-field]")){getSection("experience").zones[selectedZone][el.dataset.zoneField]=el.textContent;setDirty()}
-      if(el.matches("[data-reason-field]")){getSection("reason").differences[selectedReason][el.dataset.reasonField]=el.textContent;setDirty()}
+      if(el.matches("[data-stat-index]")){getSection("vision").stats[+el.dataset.statIndex][+el.dataset.statField]=el.textContent;setDirty()}
+      if(el.matches("[data-control-group]")){getSection(el.closest("[data-section]").dataset.section)[el.dataset.controlGroup][el.dataset.controlKey]=el.textContent;setDirty()}
+      if(el.matches("[data-zone-field]")){const i=el.dataset.zoneIndex!==undefined?+el.dataset.zoneIndex:selectedZone,field=el.dataset.zoneField;getSection("experience").zones[i][field]=el.textContent;$$(`[data-zone-field="${CSS.escape(field)}"]`).forEach(peer=>{const pi=peer.dataset.zoneIndex!==undefined?+peer.dataset.zoneIndex:selectedZone;if(peer!==el&&pi===i)peer.textContent=el.textContent});setDirty()}
+      if(el.matches("[data-need-field]")){getSection("guest").needs[+el.dataset.needIndex][el.dataset.needField]=el.textContent;setDirty()}
+      if(el.matches("[data-reason-field]")){const i=el.dataset.reasonIndex!==undefined?+el.dataset.reasonIndex:selectedReason,field=el.dataset.reasonField;getSection("reason").differences[i][field]=el.textContent;$$(`[data-reason-field="${CSS.escape(field)}"]`).forEach(peer=>{const pi=peer.dataset.reasonIndex!==undefined?+peer.dataset.reasonIndex:selectedReason;if(peer!==el&&pi===i)peer.textContent=el.textContent});setDirty()}
       if(el.matches("[data-staff-index]")){getSection("business").staff[+el.dataset.staffIndex][+el.dataset.staffField]=el.textContent;setDirty()}
+      if(el.matches("[data-slider-label]")){getSection("business").sliderLabels[el.dataset.sliderLabel]=el.textContent;setDirty()}
+      if(el.matches("[data-slider-unit]")){getSection("business").sliderUnits[el.dataset.sliderUnit]=el.textContent;setDirty()}
       if(el.matches("[data-gate-index]")){getSection("decision").gates[+el.dataset.gateIndex][+el.dataset.gateField]=el.textContent;setDirty()}
-      if(el.matches("[data-risk-field]")){let text=el.textContent;if(el.dataset.riskField==="response")text=text.replace(/^대응\s*·\s*/,"");getSection("decision").risks[selectedRisk][el.dataset.riskField]=text;setDirty()}
+      if(el.matches("[data-risk-field]")){const i=el.dataset.riskIndex!==undefined?+el.dataset.riskIndex:selectedRisk,field=el.dataset.riskField;getSection("decision").risks[i][field]=el.textContent;$$(`[data-risk-field="${CSS.escape(field)}"]`).forEach(peer=>{const pi=peer.dataset.riskIndex!==undefined?+peer.dataset.riskIndex:selectedRisk;if(peer!==el&&pi===i)peer.textContent=el.textContent});setDirty()}
       if(el.matches("[data-approval-index]")){getSection("decision").approvals[+el.dataset.approvalIndex]=el.textContent;setDirty()}
+      if(el.matches("[data-approval-number-index]")){getSection("decision").approvalNumbers[+el.dataset.approvalNumberIndex]=el.textContent;setDirty()}
       if(el.id==="compareRange"){const compare=$("#compare");compare.style.setProperty("--compare",el.value+"%");$("#compareHandle span").textContent=el.value+"%";compare.classList.add("is-scrubbing");clearTimeout(compare._scrubTimer);compare._scrubTimer=setTimeout(()=>compare.classList.remove("is-scrubbing"),260)}
-      if(el.matches("[data-slider]")){const s=getSection("business"),v=s.scenarios[s.scenario],k=el.dataset.slider;v[k]=+el.value;el.previousElementSibling.querySelector("output").textContent=Number(el.value).toLocaleString()+sliderDefs[k][4];$("#revenueTotal").textContent=money(revenue(v));setDirty()}
+      if(el.matches("[data-slider]")){const s=getSection("business"),v=s.scenarios[s.scenario],k=el.dataset.slider;v[k]=+el.value;el.previousElementSibling.querySelector(`[data-slider-value="${k}"]`).textContent=Number(el.value).toLocaleString();$("#revenueTotal").textContent=money(revenue(v));setDirty()}
     });
-    $("#surveyBtn").onclick=()=>{$("#vision").classList.toggle("is-survey");$("#surveyBtn").textContent=$("#vision").classList.contains("is-survey")?"현장 판독 닫기":"계획의 첫 선 보기";replayEffect($("#heroStats"),"is-impacting",1000)};
-    $("#zoneBack").onclick=()=>{clearInspectorSelection();zoneDetailOpen=false;const shell=$("#mapShell"),grid=document.querySelector(".experience-grid");clearTimeout(grid?._detailTimer);grid?.classList.remove("is-detail");shell.classList.remove("is-inspecting","is-entering-zone");const cameraMs=focusZoneCamera(null,1,{animate:true,staged:false});replayEffect(shell,"is-leaving-zone",cameraMs);setTimeout(()=>renderExperience(),cameraMs)};
+    $("#surveyBtn").onclick=e=>{if(!document.body.classList.contains("presentation")&&e.target.closest("[data-edit],[data-list],[data-direct]"))return;const scene=$("#vision"),on=!scene.classList.contains("is-survey"),span=$("#surveyBtn span");scene.classList.toggle("is-survey",on);span.dataset.edit=on?"surveyCloseButton":"surveyButton";span.textContent=getSection("vision")[span.dataset.edit];setEditability();replayEffect($("#heroStats"),"is-impacting",1000)};
+    $("#zoneBack").onclick=e=>{if(!document.body.classList.contains("presentation")&&e.target.closest("[data-edit],[data-list],[data-direct]"))return;clearInspectorSelection();zoneDetailOpen=false;const shell=$("#mapShell"),grid=document.querySelector(".experience-grid");clearTimeout(grid?._detailTimer);grid?.classList.remove("is-detail");shell.classList.remove("is-inspecting","is-entering-zone");const cameraMs=focusZoneCamera(null,1,{animate:true,staged:false});replayEffect(shell,"is-leaving-zone",cameraMs);setTimeout(()=>renderExperience(),cameraMs)};
     $("#fullscreenBtn").onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.();
-    $("#inspectorClose").onclick=()=>{$("#inspector").classList.remove("is-open");selectedFrame?.classList.remove("is-selected")};
-    $("#textInspectorClose").onclick=()=>$("#textInspector").classList.remove("is-open");
-    [["zoomRange","zoom",v=>+v/100],["heightRange","height",Number],["focusXRange","focalX",Number],["focusYRange","focalY",Number]].forEach(([id,k,fn])=>$("#"+id).oninput=e=>updateSelected(k,fn(e.target.value)));
+    $("#inspectorClose").onclick=clearInspectorSelection;
+    $("#textInspectorClose").onclick=clearInspectorSelection;
+    [["zoomRange","zoom",v=>+v/100],["heightRange","height",Number],["frameWidthRange","frameWidth",Number],["frameXRange","frameX",Number],["frameYRange","frameY",Number],["focusXRange","focalX",Number],["focusYRange","focalY",Number]].forEach(([id,k,fn])=>$("#"+id).oninput=e=>updateSelected(k,fn(e.target.value)));
     [["fontSizeRange","fontSize",Number],["textWidthRange","width",Number],["textXRange","x",Number],["textYRange","y",Number]].forEach(([id,k,fn])=>$("#"+id).oninput=e=>updateTextStyle(k,fn(e.target.value)));
-    $$("[data-align]").forEach(b=>b.onclick=()=>updateTextStyle("align",b.dataset.align));$("#textStyleReset").onclick=()=>{if(!selectedTextId)return;delete project.settings.textStyles[selectedTextId];selectedText.removeAttribute("style");selectText(selectedText);setDirty()};
+    $$("[data-align]").forEach(b=>b.onclick=()=>updateTextStyle("align",b.dataset.align));$("#textStyleReset").onclick=()=>{if(!selectedTextId)return;delete project.settings.textStyles[selectedTextId];applyTextLayout(selectedText);selectText(selectedText);setDirty()};
     $("#imageReplace").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{toast("이미지를 최적화하는 중…");const c=await compressImage(f);updateSelected("src",c.dataUrl);toast("이미지를 교체했습니다. Drive 저장 시 업로드됩니다.")}catch(err){toast("이미지 처리 실패: "+err.message,true)}e.target.value=""};
-    let drag=null;document.addEventListener("pointerdown",e=>{const frame=e.target.closest(".media-frame.is-selected");if(!frame||document.body.classList.contains("presentation"))return;const o=imageObject(frame.dataset.imageKey);drag={frame,o,startX:e.clientX,startY:e.clientY,fx:o.focalX??50,fy:o.focalY??50};frame.setPointerCapture?.(e.pointerId);e.preventDefault()});
-    document.addEventListener("pointermove",e=>{if(!drag)return;const r=drag.frame.getBoundingClientRect(),x=Math.max(0,Math.min(100,drag.fx-(e.clientX-drag.startX)/r.width*100)),y=Math.max(0,Math.min(100,drag.fy-(e.clientY-drag.startY)/r.height*100));drag.o.focalX=x;drag.o.focalY=y;applyImage(drag.frame,drag.frame.dataset.imageKey);updateInspectorLabels()});
-    document.addEventListener("pointerup",()=>{if(drag){setDirty();drag=null}});
+    document.addEventListener("pointerdown",e=>{
+      const dot=e.target.closest(".zone-dot[data-zone]"),shell=$("#mapShell");if(!dot||document.body.classList.contains("presentation")||zoneDetailOpen||shell?.matches(".is-entering-zone,.is-leaving-zone,.is-inspecting"))return;
+      const zone=getSection("experience").zones[+dot.dataset.zone];if(!zone)return;zoneDrag={dot,zone,pointerId:e.pointerId,rect:shell.getBoundingClientRect(),startX:e.clientX,startY:e.clientY,moved:false};dot.setPointerCapture?.(e.pointerId)
+    });
+    document.addEventListener("pointermove",e=>{
+      if(!zoneDrag||e.pointerId!==zoneDrag.pointerId)return;const dx=e.clientX-zoneDrag.startX,dy=e.clientY-zoneDrag.startY;if(!zoneDrag.moved&&Math.hypot(dx,dy)<6)return;zoneDrag.moved=true;e.preventDefault();const r=zoneDrag.rect,minX=22/r.width*100,minY=22/r.height*100,x=Math.max(minX,Math.min(100-minX,(e.clientX-r.left)/r.width*100)),y=Math.max(minY,Math.min(100-minY,(e.clientY-r.top)/r.height*100));zoneDrag.zone.x=Math.round(x*10)/10;zoneDrag.zone.y=Math.round(y*10)/10;zoneDrag.dot.style.left=zoneDrag.zone.x+"%";zoneDrag.dot.style.top=zoneDrag.zone.y+"%";zoneDrag.dot.dataset.position=`${zoneDrag.zone.x.toFixed(1)}% · ${zoneDrag.zone.y.toFixed(1)}%`;zoneDrag.dot.classList.add("is-positioning");$("#routeLine").setAttribute("points",routePoints(getSection("experience").route))
+    });
+    function finishZoneDrag(){if(!zoneDrag)return;const {dot,zone,moved,pointerId}=zoneDrag;try{dot.releasePointerCapture?.(pointerId)}catch{}dot.classList.remove("is-positioning");zoneDrag=null;if(moved){ignoreZoneClickUntil=performance.now()+380;setDirty();toast(`${zone.id} 포인트 위치를 저장했습니다.`)}}
+    document.addEventListener("pointerup",finishZoneDrag);document.addEventListener("pointercancel",finishZoneDrag);
+    let drag=null;document.addEventListener("pointerdown",e=>{const frame=e.target.closest(".media-frame.is-selected");if(!frame||document.body.classList.contains("presentation")||e.target.closest("#moveHandle"))return;const o=imageObject(frame.dataset.imageKey);drag={frame,o,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,fx:o.focalX??50,fy:o.focalY??50};frame.setPointerCapture?.(e.pointerId);e.preventDefault()});
+    document.addEventListener("pointermove",e=>{if(!drag||e.pointerId!==drag.pointerId)return;const r=drag.frame.getBoundingClientRect(),x=Math.max(0,Math.min(100,drag.fx-(e.clientX-drag.startX)/r.width*100)),y=Math.max(0,Math.min(100,drag.fy-(e.clientY-drag.startY)/r.height*100));drag.o.focalX=x;drag.o.focalY=y;applyImage(drag.frame,drag.frame.dataset.imageKey);updateInspectorLabels()});
+    function finishImageDrag(){if(!drag)return;try{drag.frame.releasePointerCapture?.(drag.pointerId)}catch{}setDirty();drag=null}document.addEventListener("pointerup",finishImageDrag);document.addEventListener("pointercancel",finishImageDrag);
     $("#settingsBtn").onclick=()=>$("#settings").classList.add("is-open");$("#settingsClose").onclick=()=>$("#settings").classList.remove("is-open");
     $("#gasUrl").value=localStorage.getItem("hwarim-gas-url")||DEFAULT_APPS_SCRIPT_URL;$("#gasUrl").onchange=e=>localStorage.setItem("hwarim-gas-url",e.target.value.trim());$("#adminKeyField").value=localStorage.getItem("hwarim-admin-key")||"";$("#adminKeyField").onchange=e=>{const key=e.target.value.trim();if(key)localStorage.setItem("hwarim-admin-key",key);else{localStorage.removeItem("hwarim-admin-key");sessionStorage.removeItem("hwarim-admin-key")}};
     $("#projectName").oninput=e=>{project.projectName=e.target.value;setDirty()};
@@ -648,7 +718,7 @@
     $("#forgetKeyBtn").onclick=()=>{localStorage.removeItem("hwarim-admin-key");sessionStorage.removeItem("hwarim-admin-key");toast("이 브라우저의 관리자 키를 지웠습니다.")};
     $("#saveDriveBtn").onclick=saveDrive;$("#loadDriveBtn").onclick=listProjects;$("#projectSelect").onchange=async e=>{if(e.target.value&&!await loadDrive(e.target.value))e.target.value=project.projectId||""};
     $("#loadPresentBtn").onclick=async()=>{const id=$("#projectSelect").value;if(!id)return toast("발표할 Drive 프로젝트를 선택하세요.",true);if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});if(await loadDrive(id))setPresentation(true);else if(document.fullscreenElement)document.exitFullscreen?.()};
-    $("#newProjectBtn").onclick=()=>{if(dirty&&!confirm("Drive에 저장하지 않은 변경이 있습니다. 새 프로젝트를 만들까요?"))return;project=makeProject();selectedZone=3;zoneDetailOpen=false;selectedNeed=0;selectedReason=0;selectedRisk=0;persist();markDriveDirty(true);renderAll();toast("새 프로젝트를 만들었습니다.")};
+    $("#newProjectBtn").onclick=()=>{if(dirty&&!confirm("Drive에 저장하지 않은 변경이 있습니다. 새 프로젝트를 만들까요?"))return;project=makeProject();selectedZone=3;zoneDetailOpen=false;selectedNeed=0;selectedReason=0;selectedRisk=0;$("#projectSelect").value="";persist();markDriveDirty(true);renderAll();toast("새 프로젝트를 만들었습니다. 기본 Drive 연결은 유지됩니다.")};
     $("#downloadBtn").onclick=()=>download(`${project.projectName||"hwarim-project"}.json`,JSON.stringify(projectExport(),null,2));
     $("#sectionDownloadBtn").onclick=()=>download(`${project.projectName}-${activeSection}.json`,JSON.stringify({channel:"hwarim-section-v1",sectionId:activeSection,section:clone(getSection())},null,2));
     $("#projectUpload").onchange=async e=>{try{project=normalizeProject(await readJson(e.target.files[0]));await hydrateDriveMedia(project);selectedZone=3;zoneDetailOpen=false;selectedNeed=0;selectedReason=0;selectedRisk=0;persist();markDriveDirty(true);renderAll();toast("전체 프로젝트를 불러왔습니다.")}catch(err){toast("JSON 파일을 확인하세요: "+err.message,true)}e.target.value=""};
@@ -660,7 +730,7 @@
     $("#listMediaBtn").onclick=listMedia;
     $("#mediaList").onclick=async e=>{const b=e.target.closest("[data-media-download]");if(!b)return;try{const r=await gas("downloadMedia",{data:{mediaId:b.dataset.mediaDownload}}),bin=atob(r.base64),arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);download(b.dataset.name,new Blob([arr],{type:r.mimeType||"application/octet-stream"}))}catch(err){toast(err.message,true)}};
     $("#presentBtn").onclick=()=>setPresentation(!document.body.classList.contains("presentation"));$("#presentExit").onclick=()=>setPresentation(false);
-    window.addEventListener("resize",()=>{clearTimeout(focusZoneCamera.t);focusZoneCamera.t=setTimeout(()=>{if($("#mapShell")?.classList.contains("is-inspecting"))focusZoneCamera(getSection("experience").zones[selectedZone],4.35,{animate:false})},120)},{passive:true});
+    window.addEventListener("resize",()=>{positionMoveHandle();clearTimeout(focusZoneCamera.t);focusZoneCamera.t=setTimeout(()=>{if($("#mapShell")?.classList.contains("is-inspecting"))focusZoneCamera(getSection("experience").zones[selectedZone],4.35,{animate:false})},120)},{passive:true});window.addEventListener("scroll",positionMoveHandle,{passive:true});
     $("#story").addEventListener("wheel",e=>{if(!document.body.classList.contains("presentation")||e.target.closest("input,select,textarea"))return;const amount=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX;if(Math.abs(amount)<32)return;e.preventDefault();if(navigationLock)return;const current=SECTION_IDS.indexOf(activeSection),next=Math.max(0,Math.min(SECTION_IDS.length-1,current+(amount>0?1:-1)));if(next!==current)go(SECTION_IDS[next])},{passive:false});
     window.addEventListener("keydown",e=>{const presenting=document.body.classList.contains("presentation");if(e.key==="Escape"&&presenting){e.preventDefault();setPresentation(false);return}if(!presenting||e.repeat)return;const target=e.target;if(target?.isContentEditable||["INPUT","TEXTAREA","SELECT","BUTTON"].includes(target?.tagName))return;if(/^[1-7]$/.test(e.key)){e.preventDefault();go(SECTION_IDS[+e.key-1]);return}if(e.key==="Home"){e.preventDefault();go(SECTION_IDS[0]);return}if(e.key==="End"){e.preventDefault();go(SECTION_IDS.at(-1));return}let delta=0;if(["ArrowDown","ArrowRight","PageDown"," "].includes(e.key))delta=1;if(["ArrowUp","ArrowLeft","PageUp"].includes(e.key))delta=-1;if(!delta)return;e.preventDefault();const next=Math.max(0,Math.min(SECTION_IDS.length-1,SECTION_IDS.indexOf(activeSection)+delta));go(SECTION_IDS[next])});
     document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("presentation"))setPresentation(false)});
