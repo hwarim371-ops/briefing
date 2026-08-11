@@ -647,7 +647,7 @@
           <h3 style="margin-top:26px">카테고리 하나만 다르게 설정</h3><p class="panel-lead">카테고리를 하나 고른 뒤 카드로 진입과 전환 방식을 정합니다.</p><div class="hub-motion-list" id="hubMotionList"></div>
         </section>
         <section class="settings-panel" data-settings-panel="drive">
-          <h3>Google Drive 연결 · 파일</h3><p class="panel-lead">기본 Apps Script 주소와 편의용 키 2371이 설정되어 있습니다. 공개 운영 전에는 Apps Script의 ADMIN_KEY를 새 값으로 바꾸고 이 브라우저에 직접 입력하세요.</p>
+          <h3>Google Drive 연결 · 파일</h3><p class="panel-lead">Drive 저장에는 이 연결이 필요하지만 주소와 키는 이미 설정되어 있습니다. 일반 사용 시 이 값을 바꾸거나 이 창을 열 필요가 없습니다. 외부 공개 운영 시에만 관리자 키를 변경하세요.</p>
           <div class="field"><label for="gasUrl">Apps Script 웹 앱 URL</label><input id="gasUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"></div>
           <div class="field"><label for="adminKeyField">관리자 키</label><input id="adminKeyField" type="password" inputmode="numeric" autocomplete="off" placeholder="2371"></div>
           <div class="settings-actions"><button class="primary" type="button" id="connectBtn">연결 확인</button><button type="button" id="forgetKeyBtn">저장된 키 지우기</button><button type="button" id="saveSectionDriveBtn">현재 섹션만 저장</button><button type="button" id="loadSectionDriveBtn">현재 섹션 불러오기</button><button type="button" id="downloadBtn">전체 프로젝트 내려받기</button><button type="button" id="sectionDownloadBtn">현재 섹션 내려받기</button><label class="file-action">전체 JSON 업로드<input type="file" id="projectUpload" accept=".json,application/json"></label><label class="file-action">현재 섹션 JSON 업로드<input type="file" id="sectionUpload" accept=".json,application/json"></label><label class="file-action">미디어 업로드<input type="file" id="mediaUpload" accept="image/*,video/*,.pdf"></label><button type="button" id="listMediaBtn">미디어 목록</button></div>
@@ -1318,7 +1318,8 @@
       return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{pending.delete(requestId);reject(new Error("Drive 응답 시간이 초과되었습니다. 잠시 뒤 프로젝트 목록을 새로고침해 저장 여부를 확인하세요."))},75000);pending.set(requestId,{resolve,reject,timer,action});$("#gasForm").requestSubmit()})
     }
     function gas(action,options={}){const run=()=>gasDirect(action,options);const result=gasQueue.then(run,run);gasQueue=result.catch(()=>{});return result}
-    window.addEventListener("message",e=>{if(e.source!==$("#gasFrame")?.contentWindow)return;const m=e.data;if(!m||m.channel!=="hwarim-drive-v1"||!m.requestId)return;const p=pending.get(m.requestId);if(!p)return;clearTimeout(p.timer);pending.delete(m.requestId);m.ok?p.resolve(m.result):p.reject(new Error(m.error?.message||m.error||"Drive 요청 실패"))});
+    function trustedGasMessageOrigin(origin){return origin==="https://script.google.com"||origin==="https://script.googleusercontent.com"||/^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/i.test(origin)}
+    window.addEventListener("message",e=>{const m=e.data;if(!m||m.channel!=="hwarim-drive-v1"||!m.requestId||!trustedGasMessageOrigin(e.origin))return;const p=pending.get(m.requestId);if(!p)return;clearTimeout(p.timer);pending.delete(m.requestId);m.ok?p.resolve(m.result):p.reject(new Error(m.error?.message||m.error||"Drive 요청 실패"))});
     async function hydrateDriveMedia(obj,targetProjectId=project.projectId){
       const refs=new Set();(function walk(x){if(typeof x==="string"&&x.startsWith("drive://"))refs.add(x.slice(8));else if(Array.isArray(x))x.forEach(walk);else if(x&&typeof x==="object")Object.values(x).forEach(walk)})(obj);
       const unresolved=[];for(const id of refs){if(mediaCache.has(id))continue;try{const r=await gas("downloadMedia",{projectId:targetProjectId,data:{mediaId:id}}),mime=r.mimeType||"application/octet-stream";mediaCache.set(id,`data:${mime};base64,${r.base64}`)}catch(err){unresolved.push(id);console.warn(err)}}return unresolved
